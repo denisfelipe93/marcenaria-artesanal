@@ -1,513 +1,264 @@
 <template>
-  <div class="hist-container" v-if="windowWidth >= 1200">
-    <div class="title-container">
-      <div class="hist-bg-text history-title-desktop">
-        <h1>32</h1>
+  <!-- Namespace leve para evitar conflito com CSS global -->
+  <div class="hist" data-hist>
+    <!-- ===== TÍTULO ===== -->
+    <div class="title">
+      <div class="title-line">
+        <h1>30</h1>
         <span>anos</span>
-        <div style="margin-right: 20px" />
-        <h1>+10k</h1>
+        <div class="spacer"></div>
+        <h1>+20k</h1>
         <span>projetos</span>
       </div>
     </div>
-    <div
-      class="hist-intro-container"
-      v-motion
-      :initial="{ opacity: 0 }"
-      :visibleOnce="{
-        opacity: 1,
-        transition: {
-          duration: 1200,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-      :delay="100"
-    >
-      <div class="video-container-desktop">
-        <iframe
-          width="100%"
-          height="100%"
-          src="https://www.youtube.com/embed/shopq-fKYwE"
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-        ></iframe>
+
+    <!-- ===== INTRO (vídeo + texto) ===== -->
+    <section class="intro">
+      <div class="intro-media">
+        <!-- A URL do YouTube é montada no computed 'embedSrc' -->
+        <div v-if="showVideo" class="video">
+          <iframe
+            class="iframe"
+            :src="embedSrc"
+            title="Marcenaria Artesanal"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+        </div>
+        <!-- fallback: imagem de capa -->
+        <img v-else :src="imgCover" alt="Marcenaria Artesanal - História" class="cover" />
       </div>
 
-      <v-carousel
-        :show-arrows="false"
-        cycle
-        show-arrows="hover"
-        class="hist-text-intro"
-        hide-delimiter-background
-      >
-        <v-carousel-item v-for="(item, i) in slideHistory" :key="i" cover>
-          <div style="font-family: Arboria-Light; font-size: 30px">
-            {{ item.text }}
-          </div>
-        </v-carousel-item>
-      </v-carousel>
-    </div>
-    <div
-      class="hist-design-container"
-      v-motion
-      :initial="{ opacity: 0, x: 200 }"
-      :visibleOnce="{
-        opacity: 1,
-        x: 0,
-        transition: {
-          duration: 1200,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-    >
-      <h3>design</h3>
-      <img :src="img1" class="hist-img-1" />
-      <p class="hist-paragraph">
-        A Marcenaria Artesanal proporciona ambientes únicos a partir de soluções
-        inovadoras na criação de móveis personalizados, de acordo com o estilo
-        de cada cliente.
-      </p>
-    </div>
-    <div
-      class="hist-beleza-container"
-      v-motion
-      :initial="{ opacity: 0, x: -200 }"
-      :visibleOnce="{
-        opacity: 1,
-        x: 0,
-        transition: {
-          duration: 1200,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-    >
-      <h3>beleza</h3>
-      <img :src="img2" class="hist-img-2" />
-      <p class="hist-paragraph hist-paragraph-beleza">
-        Com uma das maiores e mais modernas instalações no segmento de móveis
-        sob medida da região, a Marcenaria Artesanal desenvolve projetos ao lado
-        de renomados arquitetos e decoradores do estado de São Paulo.
-      </p>
-    </div>
-    <div
-      class="hist-sentido-container"
-      v-motion
-      :initial="{ opacity: 0, x: 200 }"
-      :visibleOnce="{
-        opacity: 1,
-        x: 0,
-        transition: {
-          duration: 1200,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-    >
-      <h3>sentido</h3>
-      <img :src="img3" class="hist-img-3" />
-      <p class="hist-paragraph">
-        Desde 1991, a Marcenaria Artesanal fabrica móveis de alta qualidade e
-        procedência, com design arrojado e exclusivo, tendo como premissa a
-        responsabilidade com o meio ambiente.
-      </p>
-    </div>
-  </div>
-  <div class="hist-container" v-else>
-    <div
-      class="hist-intro-container"
-      v-motion
-      :initial="{ opacity: 0 }"
-      :enter="{
-        opacity: 1,
+      <div class="intro-text">
+        <p>Desde 1991, cada móvel que nasce aqui carrega duas forças que se completam: <strong>a precisão da tecnologia e a sensibilidade das mãos.</strong></p>
+        <p>São elas que moldam, lapidam e dão vida à madeira, transformando matéria-prima de origem certificada em peças únicas feitas para atravessar gerações.</p>
+        <p>Nosso parque fabril abriga <strong>uma das estruturas mais modernas do setor</strong>, mas é o olhar atento de quem domina o ofício que garante a excelência.</p>
+        <p>Em parceria com arquitetos, decoradores e designers renomados, criamos ambientes que unem inovação, responsabilidade ambiental e um design exclusivo, pensado em cada detalhe.</p>
+        <p class="highlight">Mais que móveis sob medida, entregamos memórias feitas em madeira. Porque a tradição só tem valor quando caminha de mãos dadas com o futuro.</p>
+      </div>
+    </section>
 
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-      :delay="400"
+    <!-- ===== SEÇÕES ===== -->
+    <!-- Renderizadas por v-for; 'flip' alterna a ordem texto/mídia no desktop -->
+    <section
+      v-for="(sec, i) in sections"
+      :key="sec.key"
+      class="sect"
+      :class="{ flip: i % 2 === 1 }"
     >
-      <div class="hist-bg-texts-mobile">
-        <div class="hist-bg-text">
-          <h1>32</h1>
-          <span>anos</span>
+      <div class="row">
+        <div class="col text">
+          <h3>{{ sec.title }}</h3>
+          <div class="copy">
+            <p
+              v-for="(p, k) in sec.paragraphs"
+              :key="k"
+              v-html="p"
+            ></p>
+          </div>
         </div>
-        <div class="hist-bg-text hist-bg-text-projetos">
-          <h1>+10k</h1>
-          <span>projetos</span>
+        <div class="col media">
+          <img :src="sec.img" :alt="sec.title" class="photo" />
         </div>
       </div>
-      <div class="video-container-mobile">
-        <iframe
-          width="100%"
-          height="220px"
-          src="https://www.youtube.com/embed/shopq-fKYwE"
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-        ></iframe>
-      </div>
-      <v-carousel
-        :show-arrows="false"
-        class="hist-text-intro-mobile"
-        hide-delimiter-background
-      >
-        <v-carousel-item
-          style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-          "
-          v-for="(item, i) in slideHistory"
-          :key="i"
-          cover
-        >
-          <div
-            style="font-family: Arboria-Light; font-size: 25px; height: 55vh"
-          >
-            {{ item.text }}
-          </div>
-        </v-carousel-item>
-      </v-carousel>
-    </div>
-    <div
-      class="hist-design-container"
-      v-motion
-      :initial="{ opacity: 0 }"
-      :visibleOnce="{
-        opacity: 1,
-
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-      :delay="400"
-    >
-      <h3>design</h3>
-      <img :src="img1" class="hist-img-1" />
-      <p class="hist-paragraph">
-        A Marcenaria Artesanal proporciona ambientes únicos a partir de soluções
-        inovadoras na criação de móveis personalizados, de acordo com o estilo
-        de cada cliente.
-      </p>
-    </div>
-    <div
-      class="hist-beleza-container"
-      v-motion
-      :initial="{ opacity: 0 }"
-      :visibleOnce="{
-        opacity: 1,
-
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-      :delay="400"
-    >
-      <h3>beleza</h3>
-      <img :src="img2" class="hist-img-2" />
-      <p class="hist-paragraph hist-paragraph-beleza">
-        Com uma das maiores e mais modernas instalações no segmento de móveis
-        sob medida da região, a Marcenaria Artesanal desenvolve projetos ao lado
-        de renomados arquitetos e decoradores do estado de São Paulo.
-      </p>
-    </div>
-    <div
-      class="hist-sentido-container"
-      v-motion
-      :initial="{ opacity: 0 }"
-      :visibleOnce="{
-        opacity: 1,
-
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
-      }"
-      :delay="400"
-    >
-      <h3>sentido</h3>
-      <img :src="img3" class="hist-img-3" />
-      <p class="hist-paragraph">
-        Desde 1991, a Marcenaria Artesanal fabrica móveis de alta qualidade e
-        procedência, com design arrojado e exclusivo, tendo como premissa a
-        responsabilidade com o meio ambiente.
-      </p>
-    </div>
+    </section>
   </div>
 </template>
 
 <script>
-export default {
-  name: "History",
+// Imports estáticos (Vite/Webpack-friendly)
+import imgCover from '@/assets/history/cover.jpg'
+import img1 from '@/assets/history/img1.jpg'
+import img2 from '@/assets/history/img2.jpg'
+import img3 from '@/assets/history/img3.jpg'
 
+export default {
+  name: 'History',
   data() {
     return {
-      img1: `${new URL(
-        "../../../../assets/history/img1.jpg",
-        import.meta.url
-      )}`,
-      img2: `${new URL(
-        "../../../../assets/history/img2.jpg",
-        import.meta.url
-      )}`,
-      img3: `${new URL(
-        "../../../../assets/history/img3.jpg",
-        import.meta.url
-      )}`,
-      windowWidth: window.innerWidth,
-      slideHistory: [
+      // mídia da intro
+      imgCover,
+      showVideo: true,      // mude para false se quiser foto na intro
+      videoId: 'shopq-fKYwE',
+      useNoCookie: true,    // usa youtube-nocookie
+      autoplay: 0,          // 1 para autoplay (requer mute:1 em muitos browsers)
+      mute: 0,
+
+      // conteúdo das seções (fácil de manter/expandir)
+      sections: [
         {
-          text: "A Marcenaria Artesanal  desenvolve ambientes únicos a partir de soluções inovadoras para a criação de móveis personalizados, de acordo com o estilo de cada cliente.",
+          key: 'design',
+          title: 'DESIGN & ENGENHARIA',
+          img: img1,
+          paragraphs: [
+            'Na Marcenaria Artesanal, o projeto não para na execução.',
+            '<strong>Contamos com arquitetos e engenheiros próprios</strong>, prontos para apoiar cada etapa: da concepção ao detalhamento técnico, garantindo precisão, viabilidade e soluções inovadoras para o seu projeto.',
+            'Essa integração entre <strong>criação, técnica e execução</strong> permite entregar móveis sob medida com excelência, unindo estética, funcionalidade e durabilidade.',
+            'Mais do que uma marcenaria, somos <strong>parceiros completos</strong> na realização de ambientes únicos.',
+          ],
         },
         {
-          text: "Com uma das maiores e mais modernas instalações no segmento de móveis sob medida, desenvolvemos projetos em parceria com os mais renomados arquitetos, decoradores e designers de interiores do estado de São Paulo.",
+          key: 'beleza',
+          title: 'BELEZA',
+          img: img2,
+          paragraphs: [
+            'Com uma das maiores e mais modernas instalações no segmento de móveis sob medida da região, a Marcenaria Artesanal desenvolve projetos ao lado de renomados arquitetos e decoradores do estado de São Paulo.',
+          ],
         },
         {
-          text: "Desde 1991 fabricamos móveis de alta qualidade, com matéria prima de procedência certificada, além do design arrojado e exclusivo, tendo como premissa a responsabilidade com o meio ambiente.",
-        },
-        {
-          text: "Com uma equipe de profissionais especializados no segmento moveleiro e equipamentos com a mais alta tecnologia, a Marcenaria Artesanal é referência em qualidade excelência em serviços e produtos.",
-        },
-        {
-          text: "Instalada em um parque fabril com 6.500 m² está a sede da empresa, que conquistou um espaço importante no mercado mobiliário do estado paulista.",
+          key: 'sentido',
+          title: 'SENTIDO',
+          img: img3,
+          paragraphs: [
+            'Desde 1991, a Marcenaria Artesanal fabrica móveis de alta qualidade e procedência, com design arrojado e exclusivo, tendo como premissa a responsabilidade com o meio ambiente.',
+          ],
         },
       ],
-      videoUrl: `${new URL("https://youtu.be/shopq-fKYwE", import.meta.url)}`,
-    };
+    }
   },
-  mounted() {
-    this.$nextTick(() => {
-      window.addEventListener("resize", this.onResize);
-    });
-  },
-
-  beforeDestroy() {
-    window.removeEventListener("resize", this.onResize);
-  },
-
-  methods: {
-    onResize() {
-      this.windowWidth = window.innerWidth;
+  computed: {
+    // Monta a URL de embed do YouTube com opções seguras
+    embedSrc() {
+      const base = this.useNoCookie
+        ? 'https://www.youtube-nocookie.com/embed/'
+        : 'https://www.youtube.com/embed/'
+      const params = new URLSearchParams({
+        rel: '0',
+        modestbranding: '1',
+        playsinline: '1',
+        autoplay: String(this.autoplay),
+        mute: String(this.mute),
+      })
+      return `${base}${this.videoId}?${params.toString()}`
     },
   },
-};
+}
 </script>
 
-<style lang="css" scoped>
-.hist-container {
+<style scoped>
+/* ==========
+   Paleta original (preto/cinza) + namespace para evitar conflitos
+   ========== */
+[data-hist] {
+  /* variáveis de cor “originais” do template */
+  --ink-900: #000;                 /* títulos/números fortes */
+  --ink-800: #111;                 /* leve reforço se precisar */
+  --ink-700: #222;                 /* texto principal */
+  --ink-600: #4b5563;              /* parágrafo suave */
+  --muted: rgba(0,0,0,.6);         /* h3, labels, detalhes */
+  --divider: rgba(0,0,0,.2);       /* linhas/acento */
+
   width: 100%;
-  padding: 80px 5vw 30px 5vw;
+  padding: 80px 5%;
   margin: 0 auto;
-}
-.hist-bg-text {
-  display: flex;
-  height: 50px;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
+  max-width: 1400px;
+  font-family: 'Arboria-Light', Arial, sans-serif;
+  color: var(--ink-700);
 }
 
-.history-title-desktop {
-  display: flex;
-  height: 50px;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 90px;
+/* ===== TÍTULO ===== */
+[data-hist] .title { text-align: center; margin-bottom: 80px; }
+[data-hist] .title-line {
+  display: flex; justify-content: center; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+[data-hist] .title-line h1 {
+  font-family: 'Arboria-Thin', Arial, sans-serif;
+  font-size: 70px; font-weight: 100; line-height: 1; color: var(--ink-900); margin: 0;
+}
+[data-hist] .title-line span {
+  font-family: 'Arboria-Light', Arial, sans-serif;
+  font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+}
+[data-hist] .spacer { width: 30px; }
+
+/* ===== INTRO ===== */
+[data-hist] .intro { display: flex; gap: 60px; margin: 60px 0; align-items: flex-start; }
+[data-hist] .intro-media { flex: 1; min-width: 0; }
+[data-hist] .intro-text  { flex: 1; min-width: 0; }
+
+[data-hist] .video {
+  /* wrapper 16:9 — mantém proporção em qualquer largura */
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.1);
+  overflow: hidden;
+}
+/* fallback para navegadores sem aspect-ratio */
+@supports not (aspect-ratio: 16/9) {
+  [data-hist] .video { position: relative; padding-top: 56.25%; }
+  [data-hist] .video .iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+}
+[data-hist] .iframe { width: 100%; height: 100%; border: 0; display: block; border-radius: 12px; }
+[data-hist] .cover  { width: 100%; height: 350px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+
+[data-hist] .intro-text p {
+  font-family: 'Arboria-Light', Arial, sans-serif;
+  font-size: 18px; line-height: 1.7; margin: 0 0 24px;
+  color: var(--ink-700);
+}
+[data-hist] .intro-text strong { color: var(--ink-900); font-weight: 600; }
+[data-hist] .intro-text .highlight {
+  color: var(--ink-900);
+  border-left: 3px solid var(--divider);
+  padding-left: 15px; margin-top: 30px;
 }
 
-.hist-bg-text h1 {
-  font-family: Arboria-Thin;
-  font-size: 60px;
-  line-height: 50px;
-}
-.hist-bg-text span {
-  display: inline-block;
-  font-family: Arboria-Light;
-  font-size: 15px;
-  line-height: 15px;
-  vertical-align: middle;
-  margin: 0px 0 0px 10px;
-}
-.hist-text-intro {
-  max-width: 485px;
-  max-height: 385px;
-}
-.hist-text-intro-mobile {
-  margin: 20px auto 40px auto;
-  /* margin-top: 20px;
-  margin-bottom: 40px; */
-  max-width: 485px;
-  max-height: 385px;
-}
-img {
-  width: 90vw;
-}
-h3 {
-  font-family: Arboria-Medium;
-  font-size: 20px;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.6);
-  margin-bottom: 18px;
-}
-.hist-paragraph {
-  font-family: Arboria-Light;
-  font-size: 18px;
-  margin: 20px 0 40px 0;
-}
-.video-container-mobile {
-  margin: 50px 0 50px 0;
-}
-@media (min-width: 768px) {
-  .hist-container {
-    max-width: 1400px;
-  }
-  img {
-    width: 95%;
-    align-self: center;
-  }
-  .hist-intro-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    margin: 50px 0 50px 0;
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.2);
-  }
-  .hist-bg-texts {
-    align-self: center;
-  }
+/* ===== SEÇÕES ===== */
+[data-hist] .sect { margin: 80px 0; }
+[data-hist] .row  { display: flex; gap: 60px; align-items: flex-start; }
+[data-hist] .col  { flex: 1; min-width: 0; }
 
-  .hist-bg-text h1 {
-    font-size: 96px;
-  }
-  .hist-text-intro {
-    border: none;
-    margin-left: 15%;
-    font-size: 25px;
-  }
-  .hist-design-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 3fr 7fr;
-    margin-bottom: 0px;
-  }
-  .hist-design-container img {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    justify-self: end;
-    width: 85%;
-  }
-  .hist-design-container h3 {
-    font-size: 24px;
-    align-self: end;
-    margin-bottom: 10px;
-  }
-  .hist-design-container p {
-    margin-right: 15%;
-
-    font-size: 24px;
-    width: 80%;
-    align-self: start;
-    margin-top: 10px;
-  }
-  .hist-beleza-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 3fr 7fr;
-    margin-bottom: 0px;
-  }
-  .hist-beleza-container img {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    justify-self: start;
-    width: 85%;
-  }
-
-  .hist-beleza-container h3 {
-    font-size: 24px;
-    align-self: end;
-    margin-bottom: 10px;
-    margin-left: 15%;
-  }
-  .hist-beleza-container p {
-    font-size: 24px;
-    width: 80%;
-    align-self: start;
-    margin-top: 10px;
-    margin-left: 15%;
-  }
-  .hist-sentido-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 3fr 7fr;
-    margin-bottom: 100px;
-  }
-  .hist-sentido-container img {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    justify-self: end;
-    width: 85%;
-  }
-  .hist-sentido-container h3 {
-    font-size: 24px;
-    align-self: end;
-    margin-bottom: 10px;
-  }
-  .hist-sentido-container p {
-    font-size: 24px;
-    width: 80%;
-    align-self: start;
-    margin-top: 10px;
-  }
-  .video-container-mobile {
-    margin: 20px auto 20px auto;
-    width: 80%;
-  }
+[data-hist] h3 {
+  font-family: 'Arboria-Medium', Arial, sans-serif;
+  font-size: 22px; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 25px; letter-spacing: 1px; position: relative; padding-bottom: 10px;
 }
-.hist-bg-texts-mobile {
-  margin-top: -50px;
+[data-hist] h3::after {
+  content: ''; position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--divider);
 }
 
-@media (min-width: 1200px) {
-  .hist-intro-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin: 50px 0 50px 0;
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.2);
-    border: none;
-  }
-  .hist-text-intro {
-    border: none;
-    margin-left: 15%;
-    font-size: 32px;
-  }
-  .hist-bg-texts {
-    display: flex;
-  }
-  .hist-bg-text-projetos {
-    margin-left: 50px;
-  }
-  .v-btn--variant-text {
-    background-color: white;
-  }
-  .video-container-desktop {
-    height: 370px;
-    width: 500px;
-  }
-  .hist-design-container {
-    margin-bottom: 100px;
-  }
-  .hist-beleza-container {
-    margin-bottom: 100px;
-  }
+[data-hist] .copy p {
+  font-family: 'Arboria-Light', Arial, sans-serif;
+  font-size: 17px; line-height: 1.7; color: var(--ink-600); margin: 0 0 20px;
+}
+[data-hist] .copy p strong { color: var(--ink-900); }
+
+/* imagens das seções */
+[data-hist] .photo {
+  width: 100%; height: 350px; object-fit: cover; border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.1); transition: transform .3s ease;
+}
+[data-hist] .photo:hover { transform: scale(1.02); }
+
+/* ===== Alternância feita no TEMPLATE (classe flip) ===== */
+@media (min-width: 1025px) {
+  [data-hist] .sect .row { flex-direction: row; }            /* padrão: texto-esq / mídia-dir */
+  [data-hist] .sect.flip .row { flex-direction: row-reverse; } /* itens ímpares invertidos */
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 1024px) {
+  [data-hist] { padding: 60px 4%; }
+  [data-hist] .intro { gap: 32px; flex-direction: column; }   /* intro em coluna */
+  [data-hist] .row   { gap: 32px; flex-direction: column; }   /* seções em coluna */
+  [data-hist] .title-line h1 { font-size: 60px; }
+}
+@media (max-width: 768px) {
+  [data-hist] .title-line { flex-direction: column; gap: 10px; }
+  [data-hist] .title-line h1 { font-size: 50px; }
+  [data-hist] .cover, [data-hist] .photo { height: 250px; }
+  [data-hist] .intro-text p { font-size: 16px; }
+  [data-hist] h3 { font-size: 20px; }
+  [data-hist] .copy p { font-size: 16px; }
+}
+@media (max-width: 480px) {
+  [data-hist] { padding: 40px 3%; }
+  [data-hist] .title-line h1 { font-size: 40px; }
+  [data-hist] .cover, [data-hist] .photo { height: 200px; }
 }
 </style>
