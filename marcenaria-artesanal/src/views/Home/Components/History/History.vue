@@ -25,7 +25,14 @@
             referrerpolicy="strict-origin-when-cross-origin"
           ></iframe>
         </div>
-        <img v-else :src="imgCover" alt="Marcenaria Artesanal - História" class="cover" />
+        <img
+          v-else
+          :src="imgCover"
+          alt="Marcenaria Artesanal - História"
+          class="cover"
+          loading="lazy"
+          decoding="async"
+        />
       </div>
 
       <div class="intro-text">
@@ -76,7 +83,14 @@
           </div>
         </div>
         <div class="col media">
-          <img :src="sec.img" :alt="sec.title" class="photo" />
+          <img
+            :src="sec.img"
+            :alt="sec.title"
+            class="photo"
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
         </div>
       </div>
     </section>
@@ -168,7 +182,11 @@ export default {
     },
   },
   mounted() {
-    this.startAutoPlay()
+    // Respeita usuários com preferência por menos movimento
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    if (!prefersReduced) {
+      this.startAutoPlay()
+    }
   },
   beforeUnmount() {
     if (this.autoPlayInterval) {
@@ -336,7 +354,7 @@ export default {
 
 /* ===== SEÇÕES ===== */
 [data-hist] .sect { margin: 80px 0; }
-[data-hist] .row  { display: flex; gap: 60px; align-items: flex-start; }
+[data-hist] .row  { display: flex; gap: 60px; } /* removido align-items daqui */
 [data-hist] .col  { flex: 1; min-width: 0; }
 
 [data-hist] h3 {
@@ -360,10 +378,20 @@ export default {
 }
 [data-hist] .photo:hover { transform: scale(1.02); }
 
-/* ===== Alternância feita no TEMPLATE (classe flip) ===== */
+/* ===== Alternância + centralização no DESKTOP ===== */
 @media (min-width: 1025px) {
-  [data-hist] .sect .row { flex-direction: row; }
+  [data-hist] .sect .row { 
+    flex-direction: row;
+    align-items: center; /* <— centraliza texto e imagem verticalmente */
+  }
   [data-hist] .sect.flip .row { flex-direction: row-reverse; }
+
+  /* Texto vira flex para centralizar verticalmente o conteúdo */
+  [data-hist] .sect .col.text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 /* ===== Responsivo ===== */
@@ -374,7 +402,7 @@ export default {
     flex-direction: column;
     align-items: stretch; /* Altera para stretch em mobile */
   }
-  [data-hist] .row   { gap: 32px; flex-direction: column; }
+  [data-hist] .row   { gap: 32px; flex-direction: column; align-items: stretch; }
   [data-hist] .title-line h1 { font-size: 60px; }
 }
 @media (max-width: 768px) {
@@ -398,5 +426,11 @@ export default {
     width: 30px;
     height: 3px;
   }
+}
+
+/* Acessibilidade: reduz animações se o usuário preferir */
+@media (prefers-reduced-motion: reduce) {
+  [data-hist] .carousel { transition: none; }
+  [data-hist] .indicator-progress { animation: none; transform: none; }
 }
 </style>
