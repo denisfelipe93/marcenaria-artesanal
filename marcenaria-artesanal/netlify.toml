@@ -1,16 +1,12 @@
-# example netlify.toml
-# netlify.toml — configuração para Vite + Vue (SPA)
+# netlify.toml — Vite + Vue (SPA)
 
 [build]
-  # comando de build do Vite
   command = "npm run build"
-  # pasta gerada pelo Vite
   publish = "dist"
-  # Removido "functions" para evitar warning de diretório inexistente
-  # Se for usar Netlify Functions no futuro, descomente e crie a pasta:
+  # Se for usar funções no futuro, descomente a linha abaixo e crie a pasta:
   # functions = "netlify/functions"
 
-# SPA fallback: evita 404 em rotas do Vue Router (history mode)
+# SPA fallback (Vue Router em modo history)
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -19,12 +15,3 @@
 # Fixar Node 20 no build
 [context.production.environment]
   NODE_VERSION = "20"
-
-  ## (optional) Settings for Netlify Dev
-  ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
-  #[dev]
-  #  command = "yarn start" # Command to start your dev server
-  #  port = 3000 # Port that the dev server will be listening on
-  #  publish = "dist" # Folder with the static content for _redirect file
-
-  ## more info on configuring this file: https://docs.netlify.com/configure-builds/file-based-configuration/
