@@ -1,15 +1,24 @@
 # example netlify.toml
-[build]
-  command = "npm run build"
-  functions = "netlify/functions"
-  publish = "./marcenaria-artesanal"
+# netlify.toml — configuração para Vite + Vue (SPA)
 
-  ## Uncomment to use this redirect for Single Page Applications like create-react-app.
-  ## Not needed for static site generators.
-  #[[redirects]]
-  #  from = "/*"
-  #  to = "/index.html"
-  #  status = 200
+[build]
+  # comando de build do Vite
+  command = "npm run build"
+  # pasta gerada pelo Vite
+  publish = "dist"
+  # Removido "functions" para evitar warning de diretório inexistente
+  # Se for usar Netlify Functions no futuro, descomente e crie a pasta:
+  # functions = "netlify/functions"
+
+# SPA fallback: evita 404 em rotas do Vue Router (history mode)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Fixar Node 20 no build
+[context.production.environment]
+  NODE_VERSION = "20"
 
   ## (optional) Settings for Netlify Dev
   ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
