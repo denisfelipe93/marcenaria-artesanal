@@ -3,11 +3,14 @@
     <!-- ===== TÍTULO ===== -->
     <div class="title">
       <div class="title-line">
-        <h1>30</h1>
-        <span>anos</span>
-        <div class="spacer"></div>
-        <h1>+20k</h1>
-        <span>projetos</span>
+        <div class="title-group">
+          <h1>30</h1>
+          <span>anos</span>
+        </div>
+        <div class="title-group">
+          <h1>+20k</h1>
+          <span>projetos</span>
+        </div>
       </div>
     </div>
 
@@ -215,27 +218,57 @@ export default {
 }
 
 /* ===== TÍTULO ===== */
-[data-hist] .title { text-align: center; margin-bottom: 80px; }
-[data-hist] .title-line {
-  display: flex; justify-content: center; align-items: center;
-  gap: 20px; flex-wrap: wrap;
+[data-hist] .title { 
+  text-align: center; 
+  margin-bottom: 60px; /* Reduzido de 80px para 60px */
 }
+
+[data-hist] .title-line {
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  gap: 20px; 
+  flex-wrap: wrap;
+}
+
+[data-hist] .title-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 [data-hist] .title-line h1 {
   font-family: 'Arboria-Thin', Arial, sans-serif;
-  font-size: 70px; font-weight: 100; line-height: 1; color: var(--ink-900); margin: 0;
+  font-size: 80px;
+  font-weight: 300;
+  line-height: 1; 
+  color: var(--ink-900); 
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
+
 [data-hist] .title-line span {
   font-family: 'Arboria-Light', Arial, sans-serif;
-  font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+  font-size: 18px;
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: 2px;
 }
+
 [data-hist] .spacer { width: 30px; }
 
 /* ===== INTRO ===== */
 [data-hist] .intro { 
   display: flex; 
   gap: 60px; 
-  margin: 60px 0;
-  align-items: center; /* Alinhamento central corrigido */
+  margin: 40px 0 60px 0; /* Reduzido superior de 60px para 40px, mantido inferior 60px */
+  align-items: center;
 }
 [data-hist] .intro-media { 
   flex: 1; 
@@ -248,7 +281,7 @@ export default {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centraliza verticalmente o conteúdo */
+  justify-content: center;
 }
 
 /* Carousel Styles */
@@ -290,7 +323,7 @@ export default {
   margin-top: 10px;
 }
 
-/* Controles do carrossel - Design melhorado */
+/* Controles do carrossel */
 [data-hist] .carousel-controls {
   display: flex;
   align-items: center;
@@ -354,7 +387,7 @@ export default {
 
 /* ===== SEÇÕES ===== */
 [data-hist] .sect { margin: 80px 0; }
-[data-hist] .row  { display: flex; gap: 60px; } /* removido align-items daqui */
+[data-hist] .row  { display: flex; gap: 60px; }
 [data-hist] .col  { flex: 1; min-width: 0; }
 
 [data-hist] h3 {
@@ -382,11 +415,10 @@ export default {
 @media (min-width: 1025px) {
   [data-hist] .sect .row { 
     flex-direction: row;
-    align-items: center; /* <— centraliza texto e imagem verticalmente */
+    align-items: center;
   }
   [data-hist] .sect.flip .row { flex-direction: row-reverse; }
 
-  /* Texto vira flex para centralizar verticalmente o conteúdo */
   [data-hist] .sect .col.text {
     display: flex;
     flex-direction: column;
@@ -400,14 +432,39 @@ export default {
   [data-hist] .intro { 
     gap: 32px; 
     flex-direction: column;
-    align-items: stretch; /* Altera para stretch em mobile */
+    align-items: stretch;
+    margin: 30px 0 50px 0; /* Ajuste proporcional para tablet */
   }
   [data-hist] .row   { gap: 32px; flex-direction: column; align-items: stretch; }
-  [data-hist] .title-line h1 { font-size: 60px; }
+  [data-hist] .title-line h1 { font-size: 70px; }
+  [data-hist] .title { 
+    margin-bottom: 50px; /* Reduzido proporcionalmente para tablet */
+  }
 }
+
 @media (max-width: 768px) {
-  [data-hist] .title-line { flex-direction: column; gap: 10px; }
-  [data-hist] .title-line h1 { font-size: 50px; }
+  [data-hist] .title-line { 
+    flex-direction: column; 
+    gap: 0; 
+  }
+  
+  [data-hist] .title-group {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  [data-hist] .title-line h1 { 
+    font-size: 72px;
+    font-weight: 400;
+  }
+  
+  [data-hist] .title-line span {
+    font-size: 16px;
+    top: 1px;
+  }
+
+  [data-hist] .title-line .spacer { display: none; }
+
   [data-hist] .cover, [data-hist] .photo { height: 250px; }
   [data-hist] .intro-text p { font-size: 16px; }
   [data-hist] h3 { font-size: 20px; }
@@ -416,15 +473,38 @@ export default {
   [data-hist] .carousel-indicator {
     width: 36px;
   }
+  
+  [data-hist] .title { 
+    margin-bottom: 40px; /* Reduzido para mobile */
+  }
+  
+  [data-hist] .intro { 
+    margin: 20px 0 40px 0; /* Reduzido para mobile */
+  }
 }
+
 @media (max-width: 480px) {
   [data-hist] { padding: 40px 3%; }
-  [data-hist] .title-line h1 { font-size: 40px; }
+  [data-hist] .title-line h1 { 
+    font-size: 60px;
+  }
+  [data-hist] .title-line span { 
+    font-size: 14px;
+    top: 0;
+  }
   [data-hist] .cover, [data-hist] .photo { height: 200px; }
   
   [data-hist] .carousel-indicator {
     width: 30px;
     height: 3px;
+  }
+  
+  [data-hist] .title { 
+    margin-bottom: 30px; /* Reduzido para mobile pequeno */
+  }
+  
+  [data-hist] .intro { 
+    margin: 15px 0 30px 0; /* Reduzido para mobile pequeno */
   }
 }
 
