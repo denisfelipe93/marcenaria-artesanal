@@ -17,7 +17,10 @@
     <!-- ===== INTRO (vídeo + texto) ===== -->
     <section class="intro">
       <div class="intro-media">
-        <div v-if="showVideo" class="video">
+        <div v-if="showVideo" class="video" :class="{ loading: videoLoading }">
+          <div class="video-skeleton" v-if="videoLoading">
+            <div class="skeleton-loader"></div>
+          </div>
           <iframe
             class="iframe"
             :src="embedSrc"
@@ -26,6 +29,7 @@
             allowfullscreen
             loading="lazy"
             referrerpolicy="strict-origin-when-cross-origin"
+            @load="videoLoading = false"
           ></iframe>
         </div>
         <img
@@ -57,8 +61,9 @@
               v-for="(_, index) in 2" 
               :key="index" 
               :class="['carousel-indicator', { active: currentSlide === index }]"
-              @click="currentSlide = index"
+              @click="goToSlide(index)"
               :aria-label="`Ir para o slide ${index + 1}`"
+              :aria-current="currentSlide === index ? 'true' : 'false'"
             >
               <span class="indicator-progress" v-if="currentSlide === index"></span>
             </button>
@@ -72,7 +77,7 @@
       v-for="(sec, i) in sections"
       :key="sec.key"
       class="sect"
-      :class="{ flip: i % 2 === 1 }"
+      :class="{ flip: i % 2 === 1, 'last-section': i === sections.length - 1 }"
     >
       <div class="row">
         <div class="col text">
@@ -93,6 +98,7 @@
             loading="lazy"
             decoding="async"
             sizes="(max-width: 1024px) 100vw, 50vw"
+            @load="imageLoaded($event)"
           />
         </div>
       </div>
@@ -118,6 +124,8 @@ export default {
       mute: 0,
       currentSlide: 0,
       autoPlayInterval: null,
+      videoLoading: true,
+      prefersReducedMotion: false,
       
       sections: [
         {
@@ -174,26 +182,43 @@ export default {
       this.currentSlide = (this.currentSlide - 1 + 2) % 2
       this.resetAutoPlay()
     },
+    goToSlide(index) {
+      this.currentSlide = index
+      this.resetAutoPlay()
+    },
     startAutoPlay() {
-      this.autoPlayInterval = setInterval(() => {
-        this.nextSlide()
-      }, 8000)
+      if (!this.prefersReducedMotion) {
+        this.autoPlayInterval = setInterval(() => {
+          this.nextSlide()
+        }, 8000)
+      }
     },
     resetAutoPlay() {
       clearInterval(this.autoPlayInterval)
       this.startAutoPlay()
     },
+    imageLoaded(event) {
+      event.target.classList.remove('loading')
+    },
+    checkReducedMotion() {
+      this.prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    }
   },
   mounted() {
-    // Respeita usuários com preferência por menos movimento
-    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
-    if (!prefersReduced) {
-      this.startAutoPlay()
+    this.checkReducedMotion()
+    this.startAutoPlay()
+    
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', this.checkReducedMotion)
     }
   },
   beforeUnmount() {
     if (this.autoPlayInterval) {
       clearInterval(this.autoPlayInterval)
+    }
+    
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-reduced-motion: reduce)').removeEventListener('change', this.checkReducedMotion)
     }
   },
 }
@@ -208,9 +233,10 @@ export default {
   --muted: rgba(0,0,0,.6);
   --divider: rgba(0,0,0,.2);
   --carousel-transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  --hover-transition: all 0.3s ease;
 
   width: 100%;
-  padding: 80px 5%;
+  padding: 80px 5% 60px; /* Reduzido padding inferior de 80px para 60px */
   margin: 0 auto;
   max-width: 1400px;
   font-family: 'Arboria-Light', Arial, sans-serif;
@@ -220,7 +246,7 @@ export default {
 /* ===== TÍTULO ===== */
 [data-hist] .title { 
   text-align: center; 
-  margin-bottom: 60px; /* Reduzido de 80px para 60px */
+  margin-bottom: 60px;
 }
 
 [data-hist] .title-line {
@@ -247,6 +273,11 @@ export default {
   margin: 0;
   display: flex;
   align-items: center;
+  transition: var(--hover-transition);
+}
+
+[data-hist] .title-line h1:hover {
+  transform: translateY(-2px);
 }
 
 [data-hist] .title-line span {
@@ -259,6 +290,7 @@ export default {
   align-items: center;
   position: relative;
   top: 2px;
+  transition: var(--hover-transition);
 }
 
 [data-hist] .spacer { width: 30px; }
@@ -267,7 +299,7 @@ export default {
 [data-hist] .intro { 
   display: flex; 
   gap: 60px; 
-  margin: 40px 0 60px 0; /* Reduzido superior de 60px para 40px, mantido inferior 60px */
+  margin: 40px 0 60px 0;
   align-items: center;
 }
 [data-hist] .intro-media { 
@@ -321,9 +353,15 @@ export default {
   border-left: 3px solid var(--divider);
   padding-left: 15px; 
   margin-top: 10px;
+  transition: var(--hover-transition);
 }
 
-/* Controles do carrossel */
+[data-hist] .intro-text .highlight:hover {
+  border-left-color: var(--ink-900);
+  padding-left: 20px;
+}
+
+/* Controles do carrossel - Design melhorado */
 [data-hist] .carousel-controls {
   display: flex;
   align-items: center;
@@ -337,7 +375,7 @@ export default {
   border: none;
   background-color: rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: var(--hover-transition);
   position: relative;
   overflow: hidden;
   border-radius: 2px;
@@ -345,6 +383,16 @@ export default {
 
 [data-hist] .carousel-indicator.active {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+[data-hist] .carousel-indicator:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scaleY(1.5);
+}
+
+[data-hist] .carousel-indicator:focus {
+  outline: 2px solid var(--ink-900);
+  outline-offset: 2px;
 }
 
 [data-hist] .indicator-progress {
@@ -359,14 +407,38 @@ export default {
   animation: progress 8s linear forwards;
 }
 
+/* Loading states */
+[data-hist] .video.loading {
+  position: relative;
+}
+
+[data-hist] .video-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 12px;
+}
+
+[data-hist] .photo.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @keyframes progress {
   to {
     transform: scaleX(1);
   }
-}
-
-[data-hist] .carousel-indicator:hover {
-  background-color: rgba(0, 0, 0, 0.4);
 }
 
 [data-hist] .video {
@@ -376,40 +448,140 @@ export default {
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0,0,0,.1);
   overflow: hidden;
+  transition: var(--hover-transition);
+}
+
+[data-hist] .video:hover {
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+  transform: translateY(-2px);
 }
 
 @supports not (aspect-ratio: 16/9) {
   [data-hist] .video { position: relative; padding-top: 56.25%; }
   [data-hist] .video .iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
 }
-[data-hist] .iframe { width: 100%; height: 100%; border: 0; display: block; border-radius: 12px; }
-[data-hist] .cover  { width: 100%; height: 350px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+[data-hist] .iframe { 
+  width: 100%; 
+  height: 100%; 
+  border: 0; 
+  display: block; 
+  border-radius: 12px;
+  transition: var(--hover-transition);
+}
+[data-hist] .cover  { 
+  width: 100%; 
+  height: 350px; 
+  object-fit: cover; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 25px rgba(0,0,0,.1);
+  transition: var(--hover-transition);
+}
+
+[data-hist] .cover:hover {
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+  transform: translateY(-2px);
+}
 
 /* ===== SEÇÕES ===== */
-[data-hist] .sect { margin: 80px 0; }
+[data-hist] .sect { 
+  margin: 80px 0;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+[data-hist] .sect:nth-child(1) { animation-delay: 0.1s; }
+[data-hist] .sect:nth-child(2) { animation-delay: 0.2s; }
+[data-hist] .sect:nth-child(3) { animation-delay: 0.3s; }
+
+/* Última seção com menos margem inferior */
+[data-hist] .sect.last-section {
+  margin-bottom: 40px; /* Reduzido de 80px para 40px */
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 [data-hist] .row  { display: flex; gap: 60px; }
 [data-hist] .col  { flex: 1; min-width: 0; }
 
 [data-hist] h3 {
   font-family: 'Arboria-Medium', Arial, sans-serif;
-  font-size: 22px; text-transform: uppercase; color: var(--muted);
-  margin: 0 0 25px; letter-spacing: 1px; position: relative; padding-bottom: 10px;
+  font-size: 22px; 
+  text-transform: uppercase; 
+  color: var(--muted);
+  margin: 0 0 25px; 
+  letter-spacing: 1px; 
+  position: relative; 
+  padding-bottom: 10px;
+  transition: var(--hover-transition);
 }
+
+[data-hist] h3:hover {
+  color: var(--ink-800);
+}
+
 [data-hist] h3::after {
-  content: ''; position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--divider);
+  content: ''; 
+  position: absolute; 
+  bottom: 0; 
+  left: 0; 
+  width: 50px; 
+  height: 2px; 
+  background: var(--divider);
+  transition: var(--hover-transition);
+}
+
+[data-hist] h3:hover::after {
+  width: 70px;
+  background: var(--ink-900);
 }
 
 [data-hist] .copy p {
   font-family: 'Arboria-Light', Arial, sans-serif;
-  font-size: 17px; line-height: 1.7; color: var(--ink-600); margin: 0 0 20px;
+  font-size: 17px; 
+  line-height: 1.7; 
+  color: var(--ink-600); 
+  margin: 0 0 20px;
 }
-[data-hist] .copy p strong { color: var(--ink-900); }
+
+[data-hist] .copy p strong { 
+  color: var(--ink-900);
+  position: relative;
+}
+
+[data-hist] .copy p strong::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--ink-900);
+  transition: var(--hover-transition);
+}
+
+[data-hist] .copy p:hover strong::after {
+  width: 100%;
+}
 
 [data-hist] .photo {
-  width: 100%; height: 350px; object-fit: cover; border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,.1); transition: transform .3s ease;
+  width: 100%; 
+  height: 350px; 
+  object-fit: cover; 
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.1); 
+  transition: transform .3s ease, box-shadow .3s ease;
 }
-[data-hist] .photo:hover { transform: scale(1.02); }
+
+[data-hist] .photo:hover { 
+  transform: scale(1.02);
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+}
 
 /* ===== Alternância + centralização no DESKTOP ===== */
 @media (min-width: 1025px) {
@@ -428,17 +600,28 @@ export default {
 
 /* ===== Responsivo ===== */
 @media (max-width: 1024px) {
-  [data-hist] { padding: 60px 4%; }
+  [data-hist] { padding: 60px 4% 40px; /* Ajuste proporcional para tablet */ }
   [data-hist] .intro { 
     gap: 32px; 
     flex-direction: column;
     align-items: stretch;
-    margin: 30px 0 50px 0; /* Ajuste proporcional para tablet */
+    margin: 30px 0 50px 0;
   }
   [data-hist] .row   { gap: 32px; flex-direction: column; align-items: stretch; }
   [data-hist] .title-line h1 { font-size: 70px; }
   [data-hist] .title { 
-    margin-bottom: 50px; /* Reduzido proporcionalmente para tablet */
+    margin-bottom: 50px;
+  }
+  
+  [data-hist] .sect {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    margin: 60px 0; /* Reduzido para tablet */
+  }
+  
+  [data-hist] .sect.last-section {
+    margin-bottom: 30px; /* Reduzido para tablet */
   }
 }
 
@@ -475,16 +658,24 @@ export default {
   }
   
   [data-hist] .title { 
-    margin-bottom: 40px; /* Reduzido para mobile */
+    margin-bottom: 40px;
   }
   
   [data-hist] .intro { 
-    margin: 20px 0 40px 0; /* Reduzido para mobile */
+    margin: 20px 0 40px 0;
+  }
+  
+  [data-hist] .sect {
+    margin: 50px 0; /* Reduzido para mobile */
+  }
+  
+  [data-hist] .sect.last-section {
+    margin-bottom: 20px; /* Reduzido para mobile */
   }
 }
 
 @media (max-width: 480px) {
-  [data-hist] { padding: 40px 3%; }
+  [data-hist] { padding: 40px 3% 30px; /* Ajuste para mobile pequeno */ }
   [data-hist] .title-line h1 { 
     font-size: 60px;
   }
@@ -500,17 +691,61 @@ export default {
   }
   
   [data-hist] .title { 
-    margin-bottom: 30px; /* Reduzido para mobile pequeno */
+    margin-bottom: 30px;
   }
   
   [data-hist] .intro { 
-    margin: 15px 0 30px 0; /* Reduzido para mobile pequeno */
+    margin: 15px 0 30px 0;
+  }
+  
+  [data-hist] .sect {
+    margin: 40px 0; /* Reduzido para mobile pequeno */
+  }
+  
+  [data-hist] .sect.last-section {
+    margin-bottom: 15px; /* Reduzido para mobile pequeno */
   }
 }
 
 /* Acessibilidade: reduz animações se o usuário preferir */
 @media (prefers-reduced-motion: reduce) {
-  [data-hist] .carousel { transition: none; }
-  [data-hist] .indicator-progress { animation: none; transform: none; }
+  [data-hist] .carousel, 
+  [data-hist] .indicator-progress,
+  [data-hist] .video,
+  [data-hist] .cover,
+  [data-hist] .photo,
+  [data-hist] .title-line h1,
+  [data-hist] .title-line span,
+  [data-hist] h3,
+  [data-hist] .intro-text .highlight,
+  [data-hist] .copy p strong::after {
+    transition: none;
+    animation: none;
+  }
+  
+  [data-hist] .sect {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  [data-hist] .video:hover,
+  [data-hist] .cover:hover,
+  [data-hist] .photo:hover {
+    transform: none;
+  }
+  
+  [data-hist] .title-line h1:hover,
+  [data-hist] .title-line span:hover {
+    transform: none;
+  }
+}
+
+/* Foco visível para acessibilidade */
+[data-hist] button:focus-visible,
+[data-hist] a:focus-visible {
+  outline: 2px solid var(--ink-900);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 </style>
