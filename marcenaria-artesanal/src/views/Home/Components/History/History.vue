@@ -135,7 +135,7 @@ export default {
           paragraphs: [
             'Na Marcenaria Artesanal, o projeto não para na execução.',
             '<strong>Contamos com arquitetos e engenheiros próprios</strong>, prontos para apoiar cada etapa: da concepção ao detalhamento técnico, garantindo precisão, viabilidade e soluções inovadoras para o seu projeto.',
-            'Essa integração entre <strong>criação, técnica e execução</strong> permite entregar móveis sob medida com excelência, unindo estética, funcionalidade e durabilidade.',
+            'Essa integração entre <strong>criação, técnica e execução</strong> permite entregar móveis sob medida com excelência, unindo estética, funcionalidade và durabilidade.',
             'Mais do que uma marcenaria, somos <strong>parceiros completos</strong> na realização de ambientes únicos.',
           ],
         },
@@ -236,7 +236,7 @@ export default {
   --hover-transition: all 0.3s ease;
 
   width: 100%;
-  padding: 80px 5% 60px; /* Reduzido padding inferior de 80px para 60px */
+  padding: 80px 5% 60px;
   margin: 0 auto;
   max-width: 1400px;
   font-family: 'Arboria-Light', Arial, sans-serif;
@@ -379,6 +379,8 @@ export default {
   position: relative;
   overflow: hidden;
   border-radius: 2px;
+  /* Remover outline padrão */
+  outline: none;
 }
 
 [data-hist] .carousel-indicator.active {
@@ -390,9 +392,17 @@ export default {
   transform: scaleY(1.5);
 }
 
+/* REMOVIDO: contorno de foco padrão
 [data-hist] .carousel-indicator:focus {
   outline: 2px solid var(--ink-900);
   outline-offset: 2px;
+}
+*/
+
+/* Novo estilo de foco mais discreto */
+[data-hist] .carousel-indicator:focus {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scaleY(1.5);
 }
 
 [data-hist] .indicator-progress {
@@ -496,7 +506,7 @@ export default {
 
 /* Última seção com menos margem inferior */
 [data-hist] .sect.last-section {
-  margin-bottom: 40px; /* Reduzido de 80px para 40px */
+  margin-bottom: 40px;
 }
 
 @keyframes fadeInUp {
@@ -600,7 +610,7 @@ export default {
 
 /* ===== Responsivo ===== */
 @media (max-width: 1024px) {
-  [data-hist] { padding: 60px 4% 40px; /* Ajuste proporcional para tablet */ }
+  [data-hist] { padding: 60px 4% 40px; }
   [data-hist] .intro { 
     gap: 32px; 
     flex-direction: column;
@@ -617,11 +627,11 @@ export default {
     animation: none;
     opacity: 1;
     transform: none;
-    margin: 60px 0; /* Reduzido para tablet */
+    margin: 60px 0;
   }
   
   [data-hist] .sect.last-section {
-    margin-bottom: 30px; /* Reduzido para tablet */
+    margin-bottom: 30px;
   }
 }
 
@@ -666,16 +676,16 @@ export default {
   }
   
   [data-hist] .sect {
-    margin: 50px 0; /* Reduzido para mobile */
+    margin: 50px 0;
   }
   
   [data-hist] .sect.last-section {
-    margin-bottom: 20px; /* Reduzido para mobile */
+    margin-bottom: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  [data-hist] { padding: 40px 3% 30px; /* Ajuste para mobile pequeno */ }
+  [data-hist] { padding: 40px 3% 30px; }
   [data-hist] .title-line h1 { 
     font-size: 60px;
   }
@@ -699,11 +709,11 @@ export default {
   }
   
   [data-hist] .sect {
-    margin: 40px 0; /* Reduzido para mobile pequeno */
+    margin: 40px 0;
   }
   
   [data-hist] .sect.last-section {
-    margin-bottom: 15px; /* Reduzido para mobile pequeno */
+    margin-bottom: 15px;
   }
 }
 
@@ -741,11 +751,9 @@ export default {
   }
 }
 
-/* Foco visível para acessibilidade */
-[data-hist] button:focus-visible,
-[data-hist] a:focus-visible {
-  outline: 2px solid var(--ink-900);
-  outline-offset: 2px;
-  border-radius: 2px;
+/* Foco visível para acessibilidade - estilo mais suave */
+[data-hist] button:focus-visible {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scaleY(1.5);
 }
 </style>
