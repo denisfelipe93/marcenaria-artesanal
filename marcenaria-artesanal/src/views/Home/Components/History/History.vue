@@ -4,7 +4,7 @@
     <div class="title">
       <div class="title-line">
         <div class="title-group">
-          <h1>30</h1>
+          <h1>+30</h1>
           <span>anos</span>
         </div>
         <div class="title-group">
@@ -139,7 +139,7 @@ export default {
             'Mais do que uma marcenaria, somos <strong>parceiros completos</strong> na realização de ambientes únicos.',
           ],
         },
-        {
+        /* {
           key: 'beleza',
           title: 'BELEZA',
           img: img2,
@@ -154,7 +154,7 @@ export default {
           paragraphs: [
             'Desde 1991, a Marcenaria Artesanal fabrica móveis de alta qualidade e procedência, com design arrojado e exclusivo, tendo como premissa a responsabilidade com o meio ambiente.',
           ],
-        },
+        }, */
       ],
     }
   },
@@ -635,6 +635,7 @@ export default {
   }
 }
 
+/* ===== Tablet ===== */
 @media (max-width: 768px) {
   [data-hist] .title-line { 
     flex-direction: column; 
@@ -683,7 +684,7 @@ export default {
     margin-bottom: 20px;
   }
 }
-
+/* ===== Celular ===== */
 @media (max-width: 480px) {
   [data-hist] { padding: 40px 3% 30px; }
   [data-hist] .title-line h1 { 
