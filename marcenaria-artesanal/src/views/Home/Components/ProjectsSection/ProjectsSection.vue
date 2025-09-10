@@ -14,6 +14,7 @@
         @mousemove="dragMove"
         @wheel="wheelScroll"
         @keydown="onRowKey"
+        @mouseenter="focusRow"
         :class="{ 'is-dragging': isDragging }"
         tabindex="0"
       >
@@ -30,7 +31,6 @@
             @click.stop.prevent="onCardClick(pIdx)"
           >
             <div class="ps-media">
-              <!-- skeleton -->
               <div v-if="!coverLoaded[pIdx]" class="ps-skel" aria-hidden="true"></div>
 
               <img
@@ -52,7 +52,7 @@
         </article>
       </div>
 
-      <!-- setas desktop (sem fades) -->
+      <!-- setas desktop -->
       <button
         class="ps-arrow ps-left"
         type="button"
@@ -69,7 +69,18 @@
       >›</button>
     </div>
 
-    <!-- Modal teleported para o <body> -->
+    <!-- Dots (somente mobile/tablet) -->
+    <div class="ps-dots" v-if="projects.length > 1">
+      <span
+        v-for="(_, index) in projects"
+        :key="index"
+        :class="['ps-dot', { active: currentVisibleIndex === index }]"
+        @click="scrollToIndex(index)"
+        :aria-label="`Ir para o projeto ${index + 1}`"
+      />
+    </div>
+
+    <!-- Modal -->
     <teleport to="body">
       <transition name="ps-fade">
         <div
@@ -162,7 +173,10 @@ export default {
       // setas
       canScrollPrev: false,
       canScrollNext: true,
-      gapPx: 24, // manter sincronizado com CSS
+      gapPx: 24,
+
+      // dots
+      currentVisibleIndex: 0,
     };
   },
   computed: {
@@ -175,16 +189,17 @@ export default {
     window.addEventListener("keydown", this.onKey);
     this.$nextTick(() => {
       this.updateArrows();
-      window.addEventListener("resize", this.updateArrows, { passive: true });
+      this.updateVisibleIndex();
+      window.addEventListener("resize", this.onResize, { passive: true });
     });
   },
   beforeUnmount() {
     window.removeEventListener("keydown", this.onKey);
-    window.removeEventListener("resize", this.updateArrows);
+    window.removeEventListener("resize", this.onResize);
     document.body.style.overflow = "";
   },
   methods: {
-    // ===== Modal =====
+    /* ===== Modal ===== */
     open(projectIndex, start = 0) {
       this.activeIndex = projectIndex;
       this.current = start;
@@ -199,7 +214,7 @@ export default {
       if (this.lightboxOpen) {
         if (e.key === "Escape") this.close();
         if (e.key === "ArrowRight") this.next();
-        if (e.key === "ArrowLeft") this.prev();
+        if (e.key === "ArrowLeft")  this.prev();
       }
     },
     onImgError(e) {
@@ -208,13 +223,13 @@ export default {
       if (parent) parent.style.background = "#d9d9d9";
     },
 
-    // ===== Clique do card (ignora clique imediatamente após drag) =====
+    /* ===== Clique do card ===== */
     onCardClick(pIdx) {
       if (this.isDragging || this.draggingJustNow) return;
       this.open(pIdx, 0);
     },
 
-    // ===== Drag-to-scroll =====
+    /* ===== Drag-to-scroll ===== */
     dragStart(e) {
       this.isDragging = true;
       this.movedPx = 0;
@@ -228,7 +243,7 @@ export default {
         this.draggingJustNow = true;
         setTimeout(() => (this.draggingJustNow = false), 80);
       }
-      this.snapToNearest(); // 👈 ao soltar, encaixa no card
+      this.snapToNearest();
     },
     dragMove(e) {
       if (!this.isDragging) return;
@@ -241,14 +256,16 @@ export default {
     wheelScroll(e) {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         this.$refs.row.scrollLeft += e.deltaY;
-        // debounce do snap após a rolagem do mouse
         clearTimeout(this._wheelSnapT);
         this._wheelSnapT = setTimeout(this.snapToNearest, 140);
       }
     },
 
-    // ===== Setas & rolagem =====
-    onRowScroll() { this.updateArrows(); },
+    /* ===== Setas & rolagem ===== */
+    onRowScroll() {
+      this.updateArrows();
+      this.updateVisibleIndex();
+    },
     updateArrows() {
       const row = this.$refs.row;
       if (!row) return;
@@ -271,7 +288,7 @@ export default {
       const stride = this.cardStride() || row.clientWidth * 0.9;
       const target = Math.max(0, Math.min(row.scrollLeft + dir * stride, row.scrollWidth - row.clientWidth));
       row.scrollTo({ left: target, top: 0, behavior: "smooth" });
-      setTimeout(this.updateArrows, 220);
+      setTimeout(() => { this.updateArrows(); this.updateVisibleIndex(); }, 220);
     },
     snapToNearest() {
       const row = this.$refs.row;
@@ -281,13 +298,41 @@ export default {
       const idx = Math.round(row.scrollLeft / stride);
       const target = idx * stride;
       row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+      this.updateVisibleIndex();
     },
 
-    // teclado no carrossel (quando focado)
+    /* ===== Teclado ===== */
     onRowKey(e) {
       if (this.lightboxOpen) return;
       if (e.key === "ArrowRight") { e.preventDefault(); this.scrollByCards(1); }
       if (e.key === "ArrowLeft")  { e.preventDefault(); this.scrollByCards(-1); }
+    },
+    focusRow() {               // 👈 garante foco para as setas funcionarem
+      this.$refs.row?.focus({ preventScroll: true });
+    },
+
+    /* ===== Dots ===== */
+    updateVisibleIndex() {
+      const row = this.$refs.row;
+      if (!row) return;
+      const stride = this.cardStride();
+      if (!stride) { this.currentVisibleIndex = 0; return; }
+      const idx = Math.round(row.scrollLeft / stride);
+      const maxIdx = this.projects.length - 1;
+      this.currentVisibleIndex = Math.max(0, Math.min(idx, maxIdx));
+    },
+    scrollToIndex(index) {
+      const row = this.$refs.row;
+      if (!row) return;
+      const stride = this.cardStride();
+      const target = index * stride;
+      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+      this.currentVisibleIndex = index;
+    },
+
+    onResize() {
+      this.updateArrows();
+      this.updateVisibleIndex();
     },
   },
 };
@@ -295,11 +340,9 @@ export default {
 
 <style scoped>
 .ps-wrap { position: relative; }
+.ps-rowWrap{ position: relative; }
 
-.ps-rowWrap{
-  position: relative;
-}
-
+/* faixa de cards */
 .ps-row{
   --ps-gap: 24px;
   display:flex;
@@ -307,6 +350,7 @@ export default {
   overflow-x:auto;
   overscroll-behavior-x: contain;
   padding-right: var(--ps-gap);
+  padding-bottom: 8px;            /* 👈 dá um respiro mínimo abaixo */
   scroll-snap-type:x mandatory;
   -ms-overflow-style:none;
   scrollbar-width:none;
@@ -336,7 +380,7 @@ export default {
   border: none; border-radius: 999px;
   background: rgba(0,0,0,.14);
   color: #fff; font-size: 20px; line-height: 1;
-  display: none; /* mobile: escondido */
+  display: none;
   align-items: center; justify-content: center;
   cursor: pointer;
   transition: transform .18s ease, background .18s ease, opacity .18s ease;
@@ -347,15 +391,12 @@ export default {
 .ps-arrow:disabled{ opacity: .35; cursor: default; }
 .ps-left{  left: 4px; }
 .ps-right{ right: 4px; }
-
 @media (min-width:1024px){
   .ps-arrow{ display: inline-flex; }
 }
 
-/* ===== cartão ===== */
-.ps-cardBtn{
-  all:unset; display:block; cursor:pointer; border-radius:16px; outline: none;
-}
+/* cartão */
+.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:16px; outline: none; }
 .ps-cardBtn:focus-visible .ps-media{ box-shadow: 0 0 0 3px rgba(54,39,39,.35); }
 
 .ps-media{
@@ -385,7 +426,30 @@ export default {
 }
 @keyframes ps-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
 
-/* ===== modal (teleport) ===== */
+/* dots (mobile/tablet) */
+.ps-dots{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top: 22px;              /* 👈 mais respiro abaixo dos cards */
+}
+@media (min-width:640px){
+  .ps-dots{ margin-top: 24px; }  /* tablet um pouco mais */
+}
+.ps-dot{
+  width:8px; height:8px; border-radius:50%;
+  background-color: rgba(0,0,0,0.2);
+  cursor:pointer; transition: all .2s ease;
+}
+.ps-dot.active{
+  background-color:#362727;
+  width:24px; border-radius:4px;
+}
+@media (min-width:1024px){
+  .ps-dots{ display:none; }
+}
+
+/* modal */
 .ps-fade-enter-active,.ps-fade-leave-active{ transition:opacity .18s ease; }
 .ps-fade-enter-from,.ps-fade-leave-to{ opacity:0; }
 
@@ -393,7 +457,7 @@ export default {
   position:fixed;
   left:0; top:0;
   width:100vw; height:100vh;
-  z-index: 999999;
+  z-index:999999;
   display:flex; align-items:center; justify-content:center;
   background:rgba(0,0,0,.7);
 }
@@ -424,7 +488,6 @@ export default {
 .ps-thumb.active{ border-color:#fff; }
 .ps-thumb img{ display:block; width:100%; height:70px; object-fit:cover; }
 
-/* reduz animações para quem prefere menos movimento */
 @media (prefers-reduced-motion: reduce) {
   .ps-row, .ps-media, .ps-arrow { scroll-behavior: auto; transition: none !important; }
 }
