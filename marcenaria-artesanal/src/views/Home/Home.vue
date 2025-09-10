@@ -77,16 +77,23 @@ export default {
   },
 };
 </script>
+
 <style scoped>
+/* ======== AJUSTES DA SESSÃO PROJETOS ========= */
+
+/* Antes: height: 85vh + flex centralizado.
+   Agora: altura natural do conteúdo + respiro vertical.
+*/
 .portifolioContainer {
   background-color: #EFEFEF;
   box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 85vh;
+  display: block;              /* evita forçar centralização vertical */
+  height: auto;                /* <<< fundamental para não “estourar” */
   width: 100%;
+  padding: 60px 0;             /* mantém espaçamento similar ao antigo */
 }
+
+/* Container centralizador e com largura máxima */
 .carouselContainer {
   display: flex;
   flex-flow: column nowrap;
@@ -94,8 +101,11 @@ export default {
   width: 100%;
   max-width: 1400px;
   padding: 50px 5vw 0 5vw;
-  height: 100%;
+  height: auto;                /* <<< não herda 100% de uma altura fixa */
+  margin: 0 auto;
 }
+
+/* Títulos/subtítulos mantidos como estavam */
 .projects-title {
   font-family: Arboria-Bold;
   font-size: 24px;
@@ -107,13 +117,16 @@ export default {
   font-size: 18px;
   font-family: Arboria-Light;
 }
+
+/* Antes: height: 70vh; Agora: natural (auto).
+   Mantém o layout sem impor altura ao componente filho. */
 .carousel {
-  height: 70vh;
+  height: auto;                /* <<< remove o limite que empurrava tudo */
   box-sizing: border-box;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
+  display: block;              /* não interfere no width/scroll do filho */
 }
+
+/* CTA Instagram (inalterado) */
 .projects-instagram {
   display: block;
   margin: 0px 0 40px 0;
@@ -134,10 +147,11 @@ export default {
 .projects-instagram-logo {
   margin-left: 5px;
 }
+
+/* Responsivo (mantido) */
 @media (min-width: 768px) {
   .titleCarousel h1 {
     color: rgba(0, 0, 0, 0.8);
-
     font-family: Arboria-Medium;
     font-size: 32px;
     margin-bottom: 40px;
