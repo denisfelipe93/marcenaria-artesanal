@@ -67,15 +67,19 @@ export default {
 .im-head { display: flex; align-items: center; justify-content: space-between; color: #fff; margin-bottom: 12px; }
 .im-title { font-weight: 600; font-size: 18px; }
 .im-close { background: rgba(255,255,255,.12); color: #fff; border: none; padding: 8px 12px; border-radius: 999px; cursor: pointer; }
+
 .im-view { position: relative; background: rgba(0,0,0,.4); border-radius: 12px; overflow: hidden; }
 .im-img { display: block; width: 100%; height: 70vh; object-fit: contain; background: #000; }
+
 .im-nav { position: absolute; top: 50%; transform: translateY(-50%); border: none; padding: 10px 14px; background: rgba(255,255,255,.12); color: #fff; border-radius: 999px; cursor: pointer; }
 .im-nav:disabled { opacity: .4; cursor: default; }
 .im-prev { left: 8px; } .im-next { right: 8px; }
 .im-count { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; color: #fff; opacity: .9; }
+
 .im-thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
 .im-thumb { border: 2px solid transparent; border-radius: 8px; overflow: hidden; padding: 0; background: none; cursor: pointer; }
 .im-thumb.active { border-color: #fff; }
 .im-thumb img { display: block; width: 100%; height: 70px; object-fit: cover; }
+
 @media (max-width: 640px) { .im-img { height: 60vh; } .im-thumb img { height: 56px; } }
 </style>

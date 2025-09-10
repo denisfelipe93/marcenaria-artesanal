@@ -2,16 +2,15 @@
   <section id="hero">
     <Hero />
   </section>
-  <section
-    id="history"
-    style="background-color: #EFEFEF
-"
-  >
+
+  <section id="history" style="background-color: #EFEFEF">
     <History />
   </section>
+
   <section id="contact">
     <Contact class="contactContainer" />
   </section>
+
   <section id="portifolio" class="portifolioContainer">
     <div
       class="carouselContainer"
@@ -19,12 +18,7 @@
       :initial="{ opacity: 0 }"
       :visibleOnce="{
         opacity: 1,
-
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
+        transition: { duration: 500, type: 'keyframes', ease: 'easeIn' },
       }"
       :delay="400"
     >
@@ -44,56 +38,59 @@
           />
         </a>
       </div>
+
       <div class="carousel">
-        <HomeCarousel />
+        <!-- NOVO -->
+        <projects-section />
+
+        <!-- Antigo carrossel (mantido, porém comentado) -->
+        <!-- <HomeCarousel /> -->
       </div>
     </div>
   </section>
-  <FooterVue
-  />
+
+  <FooterVue />
 </template>
 
 <script>
 import TabsNavegation from "@/components/Tabs/TabsNavegation";
 import TabCards from "@/views/Home/Components/Tabs/TabCards";
-import HomeCarousel from "@/views/Home/Components/Carousel/HomeCarousel";
+
+// import HomeCarousel from "@/views/Home/Components/Carousel/HomeCarousel"; // comentado
+
+// ⬇ Import RELATIVO para a pasta exata:
+import ProjectsSection from "./Components/ProjectsSection/ProjectsSection.vue";
+
 import History from "@/views/Home/Components/History/History";
 import Contact from "./Components/Contact/Contact.vue";
 import Hero from "@/views/Home/Components/Hero/Hero.vue";
 import FooterVue from "@/views/Home/Components/Footer/FooterVue";
+
 export default {
   name: "Home",
   components: {
     TabsNavegation,
     TabCards,
-    HomeCarousel,
+    ProjectsSection,
+    // HomeCarousel,
     FooterVue,
     History,
     Contact,
     Hero,
   },
-  data() {
-    return {};
-  },
 };
 </script>
 
 <style scoped>
-/* ======== AJUSTES DA SESSÃO PROJETOS ========= */
-
-/* Antes: height: 85vh + flex centralizado.
-   Agora: altura natural do conteúdo + respiro vertical.
-*/
 .portifolioContainer {
   background-color: #EFEFEF;
   box-sizing: border-box;
-  display: block;              /* evita forçar centralização vertical */
-  height: auto;                /* <<< fundamental para não “estourar” */
+  display: block;
+  height: auto;
   width: 100%;
-  padding: 60px 0;             /* mantém espaçamento similar ao antigo */
+  padding: 60px 0;
 }
 
-/* Container centralizador e com largura máxima */
 .carouselContainer {
   display: flex;
   flex-flow: column nowrap;
@@ -101,11 +98,10 @@ export default {
   width: 100%;
   max-width: 1400px;
   padding: 50px 5vw 0 5vw;
-  height: auto;                /* <<< não herda 100% de uma altura fixa */
+  height: auto;
   margin: 0 auto;
 }
 
-/* Títulos/subtítulos mantidos como estavam */
 .projects-title {
   font-family: Arboria-Bold;
   font-size: 24px;
@@ -118,18 +114,22 @@ export default {
   font-family: Arboria-Light;
 }
 
-/* Antes: height: 70vh; Agora: natural (auto).
-   Mantém o layout sem impor altura ao componente filho. */
 .carousel {
-  height: auto;                /* <<< remove o limite que empurrava tudo */
+  height: auto;
   box-sizing: border-box;
-  display: block;              /* não interfere no width/scroll do filho */
+  display: block;
 }
 
-/* CTA Instagram (inalterado) */
+.carousel img {
+  height: auto !important;
+  max-height: none !important;
+  width: 100%;
+  object-fit: cover;
+}
+
 .projects-instagram {
   display: block;
-  margin: 0px 0 40px 0;
+  margin: 0 0 40px 0;
   height: 30px;
   width: 200px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.2);
@@ -144,11 +144,8 @@ export default {
   border-bottom: 0.5px solid #612d2d;
   color: #362727;
 }
-.projects-instagram-logo {
-  margin-left: 5px;
-}
+.projects-instagram-logo { margin-left: 5px; }
 
-/* Responsivo (mantido) */
 @media (min-width: 768px) {
   .titleCarousel h1 {
     color: rgba(0, 0, 0, 0.8);
@@ -156,7 +153,6 @@ export default {
     font-size: 32px;
     margin-bottom: 40px;
   }
-
   .titleCarousel h4 {
     color: rgba(0, 0, 0, 0.63);
     margin-bottom: 40px;
