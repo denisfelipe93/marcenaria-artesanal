@@ -1,95 +1,124 @@
 <template>
   <div class="ps-wrap">
-    <div
-      class="ps-row"
-      role="region"
-      aria-label="Projetos"
-      ref="row"
-      @mousedown="dragStart"
-      @mouseup="dragStop"
-      @mouseleave="dragStop"
-      @mousemove="dragMove"
-      @wheel="wheelScroll"
-      :class="{ 'is-dragging': isDragging }"
-    >
-      <article
-        v-for="(project, pIdx) in projects"
-        :key="project.id"
-        class="ps-card"
-        role="listitem"
+    <div class="ps-rowWrap">
+      <!-- faixa de cards -->
+      <div
+        class="ps-row"
+        role="region"
+        aria-label="Projetos"
+        ref="row"
+        @scroll="onRowScroll"
+        @mousedown="dragStart"
+        @mouseup="dragStop"
+        @mouseleave="dragStop"
+        @mousemove="dragMove"
+        @wheel="wheelScroll"
+        @keydown="onRowKey"
+        :class="{ 'is-dragging': isDragging }"
+        tabindex="0"
       >
-        <button
-          type="button"
-          class="ps-cardBtn"
-          :aria-label="`Abrir galeria ${project.title}`"
-          @click="open(pIdx, 0)"
+        <article
+          v-for="(project, pIdx) in projects"
+          :key="project.id"
+          class="ps-card"
+          role="listitem"
         >
-          <div class="ps-media">
-            <img
-              :src="project.cover"
-              :alt="project.title"
-              class="ps-img"
-              loading="lazy"
-              decoding="async"
-              @error="onImgError"
-            />
-            <div class="ps-grad"></div>
-            <div class="ps-cap">
-              <h3 class="ps-title">{{ project.title }}</h3>
-              <p class="ps-sub">Ver galeria</p>
+          <button
+            type="button"
+            class="ps-cardBtn"
+            :aria-label="`Abrir galeria ${project.title}`"
+            @click.stop.prevent="onCardClick(pIdx)"
+          >
+            <div class="ps-media">
+              <!-- skeleton -->
+              <div v-if="!coverLoaded[pIdx]" class="ps-skel" aria-hidden="true"></div>
+
+              <img
+                :src="project.cover"
+                :alt="project.title"
+                class="ps-img"
+                loading="lazy"
+                decoding="async"
+                @load="coverLoaded[pIdx] = true"
+                @error="onImgError"
+              />
+              <div class="ps-grad"></div>
+              <div class="ps-cap">
+                <h3 class="ps-title">{{ project.title }}</h3>
+                <p class="ps-sub">Ver galeria</p>
+              </div>
             </div>
-          </div>
-        </button>
-      </article>
+          </button>
+        </article>
+      </div>
+
+      <!-- setas desktop (sem fades) -->
+      <button
+        class="ps-arrow ps-left"
+        type="button"
+        aria-label="Projetos anteriores"
+        @click="scrollByCards(-1)"
+        :disabled="!canScrollPrev"
+      >‹</button>
+      <button
+        class="ps-arrow ps-right"
+        type="button"
+        aria-label="Mais projetos"
+        @click="scrollByCards(1)"
+        :disabled="!canScrollNext"
+      >›</button>
     </div>
 
-    <!-- Modal -->
-    <transition name="ps-fade">
-      <div
-        v-if="lightboxOpen && activeProject"
-        class="ps-backdrop"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="`Galeria: ${activeProject.title}`"
-        @click.self="close"
-      >
-        <div class="ps-panel">
-          <button
-            class="ps-close"
-            type="button"
-            aria-label="Fechar (Esc)"
-            @click="close"
-            ref="btnClose"
-          >✕</button>
-
-          <div class="ps-view">
-            <img
-              :src="activeProject.photos[current]"
-              :alt="`${activeProject.title} - imagem ${current + 1} de ${total}`"
-              class="ps-big"
-              loading="lazy"
-              decoding="async"
-            />
-            <button class="ps-nav ps-prev" :disabled="!canPrev" @click.stop="prev" aria-label="Anterior">←</button>
-            <button class="ps-nav ps-next" :disabled="!canNext" @click.stop="next" aria-label="Próxima">→</button>
-            <div class="ps-count">{{ current + 1 }} / {{ total }}</div>
-          </div>
-
-          <div class="ps-thumbs">
+    <!-- Modal teleported para o <body> -->
+    <teleport to="body">
+      <transition name="ps-fade">
+        <div
+          v-if="lightboxOpen && activeProject"
+          class="ps-backdrop"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="`Galeria: ${activeProject.title}`"
+          @click.self="close"
+        >
+          <div class="ps-panel">
             <button
-              v-for="(p, i) in activeProject.photos"
-              :key="p + i"
+              class="ps-close"
               type="button"
-              class="ps-thumb"
-              :class="{ active: i === current }"
-              @click="current = i"
-            >
-              <img :src="p" :alt="`${activeProject.title} miniatura ${i + 1}`" />
-            </button>
+              aria-label="Fechar (Esc)"
+              @click="close"
+              ref="btnClose"
+            >✕</button>
+
+            <div class="ps-view">
+              <img
+                :src="activeProject.photos[current]"
+                :alt="`${activeProject.title} - imagem ${current + 1} de ${total}`"
+                class="ps-big"
+                loading="lazy"
+                decoding="async"
+              />
+              <button class="ps-nav ps-prev" :disabled="!canPrev" @click.stop="prev" aria-label="Anterior">←</button>
+              <button class="ps-nav ps-next" :disabled="!canNext" @click.stop="next" aria-label="Próxima">→</button>
+              <div class="ps-count" aria-live="polite">{{ current + 1 }} / {{ total }}</div>
+            </div>
+
+            <div class="ps-thumbs">
+              <button
+                v-for="(p, i) in activeProject.photos"
+                :key="p + i"
+                type="button"
+                class="ps-thumb"
+                :class="{ active: i === current }"
+                @click="current = i"
+                :aria-label="`${activeProject.title} miniatura ${i + 1}`"
+              >
+                <img :src="p" alt="" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </teleport>
   </div>
 </template>
 
@@ -117,6 +146,8 @@ export default {
         { id: "sala-de-jantar", title: "Sala de Jantar", cover: image3,  photos: [image9, image10] },
         { id: "comercial",      title: "Comercial",      cover: image4,  photos: [image11, image12] },
       ],
+      coverLoaded: [false, false, false, false],
+
       lightboxOpen: false,
       activeIndex: -1,
       current: 0,
@@ -125,6 +156,13 @@ export default {
       isDragging: false,
       startX: 0,
       scrollStart: 0,
+      movedPx: 0,
+      draggingJustNow: false,
+
+      // setas
+      canScrollPrev: false,
+      canScrollNext: true,
+      gapPx: 24, // manter sincronizado com CSS
     };
   },
   computed: {
@@ -133,12 +171,20 @@ export default {
     canPrev()       { return this.current > 0; },
     canNext()       { return this.current < this.total - 1; },
   },
-  mounted() { window.addEventListener("keydown", this.onKey); },
+  mounted() {
+    window.addEventListener("keydown", this.onKey);
+    this.$nextTick(() => {
+      this.updateArrows();
+      window.addEventListener("resize", this.updateArrows, { passive: true });
+    });
+  },
   beforeUnmount() {
     window.removeEventListener("keydown", this.onKey);
+    window.removeEventListener("resize", this.updateArrows);
     document.body.style.overflow = "";
   },
   methods: {
+    // ===== Modal =====
     open(projectIndex, start = 0) {
       this.activeIndex = projectIndex;
       this.current = start;
@@ -150,10 +196,11 @@ export default {
     next() { if (this.canNext) this.current++; },
     prev() { if (this.canPrev) this.current--; },
     onKey(e) {
-      if (!this.lightboxOpen) return;
-      if (e.key === "Escape") this.close();
-      if (e.key === "ArrowRight") this.next();
-      if (e.key === "ArrowLeft") this.prev();
+      if (this.lightboxOpen) {
+        if (e.key === "Escape") this.close();
+        if (e.key === "ArrowRight") this.next();
+        if (e.key === "ArrowLeft") this.prev();
+      }
     },
     onImgError(e) {
       e.target.style.display = "none";
@@ -161,28 +208,86 @@ export default {
       if (parent) parent.style.background = "#d9d9d9";
     },
 
-    // ---- Drag-to-scroll (desktop mouse) ----
+    // ===== Clique do card (ignora clique imediatamente após drag) =====
+    onCardClick(pIdx) {
+      if (this.isDragging || this.draggingJustNow) return;
+      this.open(pIdx, 0);
+    },
+
+    // ===== Drag-to-scroll =====
     dragStart(e) {
       this.isDragging = true;
+      this.movedPx = 0;
       this.startX = e.pageX - this.$refs.row.offsetLeft;
       this.scrollStart = this.$refs.row.scrollLeft;
     },
     dragStop() {
+      if (!this.isDragging) return;
       this.isDragging = false;
+      if (this.movedPx > 8) {
+        this.draggingJustNow = true;
+        setTimeout(() => (this.draggingJustNow = false), 80);
+      }
+      this.snapToNearest(); // 👈 ao soltar, encaixa no card
     },
     dragMove(e) {
       if (!this.isDragging) return;
       e.preventDefault();
       const x = e.pageX - this.$refs.row.offsetLeft;
-      const walk = (x - this.startX) * 1.2; // sensibilidade
-      this.$refs.row.scrollLeft = this.scrollStart - walk;
+      const delta = x - this.startX;
+      this.movedPx = Math.max(this.movedPx, Math.abs(delta));
+      this.$refs.row.scrollLeft = this.scrollStart - delta * 1.2;
     },
-    // rolagem com a rodinha do mouse na horizontal
     wheelScroll(e) {
-      // se o gesto é vertical, usa para mover horizontalmente a faixa
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         this.$refs.row.scrollLeft += e.deltaY;
+        // debounce do snap após a rolagem do mouse
+        clearTimeout(this._wheelSnapT);
+        this._wheelSnapT = setTimeout(this.snapToNearest, 140);
       }
+    },
+
+    // ===== Setas & rolagem =====
+    onRowScroll() { this.updateArrows(); },
+    updateArrows() {
+      const row = this.$refs.row;
+      if (!row) return;
+      const max = row.scrollWidth - row.clientWidth;
+      const sl = row.scrollLeft;
+      this.canScrollPrev = sl > 4;
+      this.canScrollNext = sl < max - 4;
+    },
+    cardStride() {
+      const row = this.$refs.row;
+      if (!row) return 0;
+      const firstCard = row.querySelector(".ps-card");
+      if (!firstCard) return 0;
+      const w = firstCard.getBoundingClientRect().width;
+      return Math.round(w + this.gapPx);
+    },
+    scrollByCards(dir = 1) {
+      const row = this.$refs.row;
+      if (!row) return;
+      const stride = this.cardStride() || row.clientWidth * 0.9;
+      const target = Math.max(0, Math.min(row.scrollLeft + dir * stride, row.scrollWidth - row.clientWidth));
+      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+      setTimeout(this.updateArrows, 220);
+    },
+    snapToNearest() {
+      const row = this.$refs.row;
+      if (!row) return;
+      const stride = this.cardStride();
+      if (!stride) return;
+      const idx = Math.round(row.scrollLeft / stride);
+      const target = idx * stride;
+      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+    },
+
+    // teclado no carrossel (quando focado)
+    onRowKey(e) {
+      if (this.lightboxOpen) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); this.scrollByCards(1); }
+      if (e.key === "ArrowLeft")  { e.preventDefault(); this.scrollByCards(-1); }
     },
   },
 };
@@ -191,37 +296,68 @@ export default {
 <style scoped>
 .ps-wrap { position: relative; }
 
-/* faixa de cards */
+.ps-rowWrap{
+  position: relative;
+}
+
 .ps-row{
   --ps-gap: 24px;
   display:flex;
   gap: var(--ps-gap);
   overflow-x:auto;
+  overscroll-behavior-x: contain;
   padding-right: var(--ps-gap);
   scroll-snap-type:x mandatory;
   -ms-overflow-style:none;
   scrollbar-width:none;
-  min-height: 1px; /* suficiente; a própria mídia define a altura */
+  min-height: 1px;
   cursor: grab;
+  scroll-behavior: smooth;
+  outline: none;
 }
 .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
 .ps-row::-webkit-scrollbar{ display:none; }
 
-/* Larguras: 1 / 2 / 3 cards */
-.ps-card{ flex:0 0 90%; scroll-snap-align:start; }
+/* 1 / 2 / 3 cards por vez */
+.ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
 @media (min-width:640px){
-  .ps-card{ flex-basis: calc((100% - var(--ps-gap)) / 2); } /* 2 cards */
+  .ps-card{ flex-basis: calc((100% - var(--ps-gap)) / 2); }
 }
 @media (min-width:1024px){
   .ps-card{ flex-basis: calc((100% - (2 * var(--ps-gap))) / 3); } /* 3 cards */
 }
 
-/* Cartão */
-.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:16px; }
+/* setas (desktop) */
+.ps-arrow{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px; height: 36px;
+  border: none; border-radius: 999px;
+  background: rgba(0,0,0,.14);
+  color: #fff; font-size: 20px; line-height: 1;
+  display: none; /* mobile: escondido */
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease, opacity .18s ease;
+  opacity: .95;
+  backdrop-filter: saturate(120%) blur(2px);
+}
+.ps-arrow:hover{ transform: translateY(-50%) scale(1.06); background: rgba(0,0,0,.22); }
+.ps-arrow:disabled{ opacity: .35; cursor: default; }
+.ps-left{  left: 4px; }
+.ps-right{ right: 4px; }
 
-/* Mídia responsiva:
-   - usa aspect-ratio para manter proporção
-   - altura com clamp para não ficar gigante nem minúsculo */
+@media (min-width:1024px){
+  .ps-arrow{ display: inline-flex; }
+}
+
+/* ===== cartão ===== */
+.ps-cardBtn{
+  all:unset; display:block; cursor:pointer; border-radius:16px; outline: none;
+}
+.ps-cardBtn:focus-visible .ps-media{ box-shadow: 0 0 0 3px rgba(54,39,39,.35); }
+
 .ps-media{
   position:relative;
   width:100%;
@@ -229,20 +365,35 @@ export default {
   background:#e5e5e5;
   border-radius:16px;
   overflow:hidden;
-  height: clamp(180px, 22vw, 320px);
+  height: clamp(180px, 20vw, 290px);
+  transition: transform .18s ease, box-shadow .18s ease;
+  will-change: transform;
 }
+.ps-cardBtn:hover .ps-media{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+
 .ps-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 .ps-grad{ position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0)); }
 .ps-cap{ position:absolute; left:0; right:0; bottom:0; padding:16px 20px; color:#fff; }
 .ps-title{ font-weight:600; font-size:18px; font-family:Arboria-Bold, system-ui; }
 .ps-sub{ font-size:13px; opacity:.9; margin-top:4px; font-family:Arboria-Light, system-ui; }
 
-/* Modal */
+/* skeleton */
+.ps-skel{
+  position:absolute; inset:0; background:
+    linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%);
+  animation: ps-shimmer 1.1s infinite linear;
+}
+@keyframes ps-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+
+/* ===== modal (teleport) ===== */
 .ps-fade-enter-active,.ps-fade-leave-active{ transition:opacity .18s ease; }
 .ps-fade-enter-from,.ps-fade-leave-to{ opacity:0; }
 
 .ps-backdrop{
-  position:fixed; inset:0; z-index:9999;
+  position:fixed;
+  left:0; top:0;
+  width:100vw; height:100vh;
+  z-index: 999999;
   display:flex; align-items:center; justify-content:center;
   background:rgba(0,0,0,.7);
 }
@@ -254,7 +405,6 @@ export default {
   width:36px; height:36px; border-radius:999px; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
 }
-@media (max-width:640px){ .ps-close{ top:-48px; } }
 
 .ps-view{ position:relative; background:rgba(0,0,0,.35); border-radius:12px; overflow:hidden; }
 .ps-big{ display:block; width:100%; height:70vh; object-fit:contain; background:#000; }
@@ -274,8 +424,8 @@ export default {
 .ps-thumb.active{ border-color:#fff; }
 .ps-thumb img{ display:block; width:100%; height:70px; object-fit:cover; }
 
-@media (max-width:640px){
-  .ps-big{ height:60vh; }
-  .ps-thumb img{ height:56px; }
+/* reduz animações para quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  .ps-row, .ps-media, .ps-arrow { scroll-behavior: auto; transition: none !important; }
 }
 </style>
