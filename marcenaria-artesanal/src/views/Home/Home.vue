@@ -148,4 +148,13 @@ export default {
     font-family: Arboria-Light;
   }
 }
+
+@media (max-width: 1023px) {
+  .carouselContainer { 
+    padding-top: 0px;    /* topo do bloco "PROJETOS / subtítulo / instagram" */
+  }
+  .projects-instagram {
+    margin-bottom: 40px;  /* já era 40px; reforçamos a simetria */
+  }
+}
 </style>
