@@ -3,7 +3,7 @@
     <Hero />
   </section>
 
-  <section id="history" style="background-color: #EFEFEF">
+  <section id="history" style="background-color:#EFEFEF">
     <History />
   </section>
 
@@ -11,39 +11,34 @@
     <Contact class="contactContainer" />
   </section>
 
+  <!-- NOVO: How it Works (abaixo do Contato) -->
+  <section id="how-it-works">
+    <HowItWorks />
+  </section>
+
   <section id="portifolio" class="portifolioContainer">
     <div
       class="carouselContainer"
       v-motion
       :initial="{ opacity: 0 }"
-      :visibleOnce="{
-        opacity: 1,
-        transition: { duration: 500, type: 'keyframes', ease: 'easeIn' },
-      }"
+      :visibleOnce="{ opacity: 1, transition: { duration: 500, type: 'keyframes', ease: 'easeIn' } }"
       :delay="400"
     >
       <div class="titleCarousel">
         <h1 class="projects-title">PROJETOS</h1>
-        <h4 class="projects-subtitle">
-          Conheça alguns de nossos projetos
-        </h4>
+        <h4 class="projects-subtitle">Conheça alguns de nossos projetos</h4>
         <a
           class="projects-instagram"
           href="https://www.instagram.com/marcenariaartesanal/?hl=en"
         >
           Veja mais no Instagram
-          <font-awesome-icon
-            :icon="['fab', 'fa-instagram']"
-            class="projects-instagram-logo"
-          />
+          <font-awesome-icon :icon="['fab', 'fa-instagram']" class="projects-instagram-logo" />
         </a>
       </div>
 
       <div class="carousel">
-        <!-- NOVO -->
+        <!-- mantém ProjectsSection dos seus projetos -->
         <projects-section />
-
-        <!-- Antigo carrossel (mantido, porém comentado) -->
         <!-- <HomeCarousel /> -->
       </div>
     </div>
@@ -55,12 +50,9 @@
 <script>
 import TabsNavegation from "@/components/Tabs/TabsNavegation";
 import TabCards from "@/views/Home/Components/Tabs/TabCards";
-
-// import HomeCarousel from "@/views/Home/Components/Carousel/HomeCarousel"; // comentado
-
-// ⬇ Import RELATIVO para a pasta exata:
+// import HomeCarousel from "@/views/Home/Components/Carousel/HomeCarousel";
 import ProjectsSection from "./Components/ProjectsSection/ProjectsSection.vue";
-
+import HowItWorks from "./Components/HowItWorks/HowItWorks.vue";
 import History from "@/views/Home/Components/History/History";
 import Contact from "./Components/Contact/Contact.vue";
 import Hero from "@/views/Home/Components/Hero/Hero.vue";
@@ -72,6 +64,7 @@ export default {
     TabsNavegation,
     TabCards,
     ProjectsSection,
+    HowItWorks,
     // HomeCarousel,
     FooterVue,
     History,
@@ -90,7 +83,6 @@ export default {
   width: 100%;
   padding: 60px 0;
 }
-
 .carouselContainer {
   display: flex;
   flex-flow: column nowrap;
@@ -101,7 +93,6 @@ export default {
   height: auto;
   margin: 0 auto;
 }
-
 .projects-title {
   font-family: Arboria-Bold;
   font-size: 24px;
@@ -113,20 +104,17 @@ export default {
   font-size: 18px;
   font-family: Arboria-Light;
 }
-
 .carousel {
   height: auto;
   box-sizing: border-box;
   display: block;
 }
-
 .carousel img {
   height: auto !important;
   max-height: none !important;
   width: 100%;
   object-fit: cover;
 }
-
 .projects-instagram {
   display: block;
   margin: 0 0 40px 0;
