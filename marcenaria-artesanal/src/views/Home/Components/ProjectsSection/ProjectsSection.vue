@@ -1,20 +1,19 @@
 <template>
   <div class="ps-wrap">
     <div class="ps-rowWrap">
-      <!-- faixa de cards -->
       <div
         class="ps-row"
         role="region"
         aria-label="Projetos"
         ref="row"
         @scroll="onRowScroll"
-        @mousedown="dragStart"
-        @mouseup="dragStop"
-        @mouseleave="dragStop"
-        @mousemove="dragMove"
         @wheel="wheelScroll"
         @keydown="onRowKey"
         @mouseenter="focusRow"
+        @pointerdown="pointerStart"
+        @pointermove="pointerMove"
+        @pointerup="pointerEnd"
+        @pointercancel="pointerEnd"
         :class="{ 'is-dragging': isDragging }"
         tabindex="0"
       >
@@ -45,14 +44,13 @@
               <div class="ps-grad"></div>
               <div class="ps-cap">
                 <h3 class="ps-title">{{ project.title }}</h3>
-                <p class="ps-sub">Ver galeria</p>
+                <p class="ps-sub">Abrir galeria • {{ project.photos.length }} fotos</p>
               </div>
             </div>
           </button>
         </article>
       </div>
 
-      <!-- setas desktop -->
       <button
         class="ps-arrow ps-left"
         type="button"
@@ -69,18 +67,18 @@
       >›</button>
     </div>
 
-    <!-- Dots (somente mobile/tablet) -->
     <div class="ps-dots" v-if="projects.length > 1">
       <span
         v-for="(_, index) in projects"
         :key="index"
         :class="['ps-dot', { active: currentVisibleIndex === index }]"
         @click="scrollToIndex(index)"
+        tabindex="0"
+        @keydown.enter.space.prevent="scrollToIndex(index)"
         :aria-label="`Ir para o projeto ${index + 1}`"
       />
     </div>
 
-    <!-- Modal -->
     <teleport to="body">
       <transition name="ps-fade">
         <div
@@ -91,7 +89,7 @@
           :aria-label="`Galeria: ${activeProject.title}`"
           @click.self="close"
         >
-          <div class="ps-panel">
+          <div class="ps-panel" ref="panel">
             <button
               class="ps-close"
               type="button"
@@ -163,12 +161,11 @@ export default {
       activeIndex: -1,
       current: 0,
 
-      // drag-to-scroll
+      // arrasto universal
       isDragging: false,
       startX: 0,
       scrollStart: 0,
       movedPx: 0,
-      draggingJustNow: false,
 
       // setas
       canScrollPrev: false,
@@ -177,6 +174,9 @@ export default {
 
       // dots
       currentVisibleIndex: 0,
+
+      // trap
+      _trapHandler: null,
     };
   },
   computed: {
@@ -197,6 +197,10 @@ export default {
     window.removeEventListener("keydown", this.onKey);
     window.removeEventListener("resize", this.onResize);
     document.body.style.overflow = "";
+    if (this._trapHandler) {
+      const panel = this.$refs.panel;
+      panel && panel.removeEventListener("keydown", this._trapHandler);
+    }
   },
   methods: {
     /* ===== Modal ===== */
@@ -205,9 +209,34 @@ export default {
       this.current = start;
       this.lightboxOpen = true;
       document.body.style.overflow = "hidden";
-      this.$nextTick(() => this.$refs.btnClose?.focus());
+
+      this.$nextTick(() => {
+        const panel = this.$refs.panel;
+        if (panel) {
+          const focusable = panel.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+
+          this._trapHandler = (e) => {
+            if (e.key !== "Tab") return;
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last && last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first && first.focus(); }
+          };
+          panel.addEventListener("keydown", this._trapHandler);
+        }
+        this.$refs.btnClose?.focus();
+      });
     },
-    close() { this.lightboxOpen = false; this.activeIndex = -1; document.body.style.overflow = ""; },
+    close() {
+      this.lightboxOpen = false;
+      this.activeIndex = -1;
+      document.body.style.overflow = "";
+      if (this._trapHandler) {
+        const panel = this.$refs.panel;
+        panel && panel.removeEventListener("keydown", this._trapHandler);
+        this._trapHandler = null;
+      }
+    },
     next() { if (this.canNext) this.current++; },
     prev() { if (this.canPrev) this.current--; },
     onKey(e) {
@@ -223,117 +252,83 @@ export default {
       if (parent) parent.style.background = "#d9d9d9";
     },
 
-    /* ===== Clique do card ===== */
     onCardClick(pIdx) {
-      if (this.isDragging || this.draggingJustNow) return;
+      if (this.movedPx > 8) return; // ignorar se arrastou
       this.open(pIdx, 0);
     },
 
-    /* ===== Drag-to-scroll ===== */
-    dragStart(e) {
+    /* ===== Pointer Events ===== */
+    pointerStart(e) {
       this.isDragging = true;
       this.movedPx = 0;
-      this.startX = e.pageX - this.$refs.row.offsetLeft;
+      this.startX = e.clientX - this.$refs.row.offsetLeft;
       this.scrollStart = this.$refs.row.scrollLeft;
     },
-    dragStop() {
+    pointerMove(e) {
       if (!this.isDragging) return;
-      this.isDragging = false;
-      if (this.movedPx > 8) {
-        this.draggingJustNow = true;
-        setTimeout(() => (this.draggingJustNow = false), 80);
-      }
-      this.snapToNearest();
-    },
-    dragMove(e) {
-      if (!this.isDragging) return;
-      e.preventDefault();
-      const x = e.pageX - this.$refs.row.offsetLeft;
+      const x = e.clientX - this.$refs.row.offsetLeft;
       const delta = x - this.startX;
       this.movedPx = Math.max(this.movedPx, Math.abs(delta));
       this.$refs.row.scrollLeft = this.scrollStart - delta * 1.2;
     },
-    wheelScroll(e) {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        this.$refs.row.scrollLeft += e.deltaY;
-        clearTimeout(this._wheelSnapT);
-        this._wheelSnapT = setTimeout(this.snapToNearest, 140);
-      }
+    pointerEnd() {
+      if (!this.isDragging) return;
+      this.isDragging = false;
+      if (this.movedPx > 8) this.snapToNearest();
+      setTimeout(()=>{ this.movedPx = 0; }, 0);
     },
 
     /* ===== Setas & rolagem ===== */
-    onRowScroll() {
-      this.updateArrows();
-      this.updateVisibleIndex();
-    },
-    updateArrows() {
-      const row = this.$refs.row;
-      if (!row) return;
+    onRowScroll(){ this.updateArrows(); this.updateVisibleIndex(); },
+    updateArrows(){
+      const row = this.$refs.row; if(!row) return;
       const max = row.scrollWidth - row.clientWidth;
       const sl = row.scrollLeft;
       this.canScrollPrev = sl > 4;
       this.canScrollNext = sl < max - 4;
     },
-    cardStride() {
-      const row = this.$refs.row;
-      if (!row) return 0;
-      const firstCard = row.querySelector(".ps-card");
-      if (!firstCard) return 0;
-      const w = firstCard.getBoundingClientRect().width;
-      return Math.round(w + this.gapPx);
+    cardStride(){
+      const row = this.$refs.row; if(!row) return 0;
+      const first = row.querySelector(".ps-card"); if(!first) return 0;
+      return Math.round(first.getBoundingClientRect().width + this.gapPx);
     },
-    scrollByCards(dir = 1) {
-      const row = this.$refs.row;
-      if (!row) return;
+    scrollByCards(dir=1){
+      const row = this.$refs.row; if(!row) return;
       const stride = this.cardStride() || row.clientWidth * 0.9;
-      const target = Math.max(0, Math.min(row.scrollLeft + dir * stride, row.scrollWidth - row.clientWidth));
-      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
-      setTimeout(() => { this.updateArrows(); this.updateVisibleIndex(); }, 220);
+      const target = Math.max(0, Math.min(row.scrollLeft + dir*stride, row.scrollWidth - row.clientWidth));
+      row.scrollTo({ left: target, behavior:"smooth" });
+      setTimeout(()=>{ this.updateArrows(); this.updateVisibleIndex(); }, 220);
     },
-    snapToNearest() {
-      const row = this.$refs.row;
-      if (!row) return;
-      const stride = this.cardStride();
-      if (!stride) return;
+    snapToNearest(){
+      const row = this.$refs.row; if(!row) return;
+      const stride = this.cardStride(); if(!stride) return;
       const idx = Math.round(row.scrollLeft / stride);
-      const target = idx * stride;
-      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+      row.scrollTo({ left: idx*stride, behavior:"smooth" });
       this.updateVisibleIndex();
     },
 
-    /* ===== Teclado ===== */
-    onRowKey(e) {
-      if (this.lightboxOpen) return;
-      if (e.key === "ArrowRight") { e.preventDefault(); this.scrollByCards(1); }
-      if (e.key === "ArrowLeft")  { e.preventDefault(); this.scrollByCards(-1); }
+    /* ===== Teclado & dots ===== */
+    onRowKey(e){
+      if(this.lightboxOpen) return;
+      if(e.key==="ArrowRight"){ e.preventDefault(); this.scrollByCards(1); }
+      if(e.key==="ArrowLeft"){  e.preventDefault(); this.scrollByCards(-1); }
     },
-    focusRow() {               // 👈 garante foco para as setas funcionarem
-      this.$refs.row?.focus({ preventScroll: true });
-    },
+    focusRow(){ this.$refs.row?.focus({ preventScroll:true }); },
 
-    /* ===== Dots ===== */
-    updateVisibleIndex() {
-      const row = this.$refs.row;
-      if (!row) return;
-      const stride = this.cardStride();
-      if (!stride) { this.currentVisibleIndex = 0; return; }
+    updateVisibleIndex(){
+      const row = this.$refs.row; if(!row) return;
+      const stride = this.cardStride(); if(!stride){ this.currentVisibleIndex=0; return; }
       const idx = Math.round(row.scrollLeft / stride);
-      const maxIdx = this.projects.length - 1;
-      this.currentVisibleIndex = Math.max(0, Math.min(idx, maxIdx));
+      this.currentVisibleIndex = Math.max(0, Math.min(idx, this.projects.length-1));
     },
-    scrollToIndex(index) {
-      const row = this.$refs.row;
-      if (!row) return;
+    scrollToIndex(index){
+      const row = this.$refs.row; if(!row) return;
       const stride = this.cardStride();
-      const target = index * stride;
-      row.scrollTo({ left: target, top: 0, behavior: "smooth" });
+      row.scrollTo({ left: index*stride, behavior:"smooth" });
       this.currentVisibleIndex = index;
     },
 
-    onResize() {
-      this.updateArrows();
-      this.updateVisibleIndex();
-    },
+    onResize(){ this.updateArrows(); this.updateVisibleIndex(); },
   },
 };
 </script>
@@ -345,72 +340,47 @@ export default {
 /* faixa de cards */
 .ps-row{
   --ps-gap: 24px;
-  display:flex;
-  gap: var(--ps-gap);
-  overflow-x:auto;
+  display:flex; gap: var(--ps-gap);
+  overflow-x:auto; overflow-y:visible;
   overscroll-behavior-x: contain;
-  padding-right: var(--ps-gap);
-  padding-bottom: 8px;            /* 👈 dá um respiro mínimo abaixo */
-  scroll-snap-type:x mandatory;
-  -ms-overflow-style:none;
-  scrollbar-width:none;
-  min-height: 1px;
-  cursor: grab;
-  scroll-behavior: smooth;
-  outline: none;
+  padding-right: var(--ps-gap); padding-bottom: 8px;
+  scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none;
+  min-height: 1px; cursor: grab; scroll-behavior: smooth; outline: none;
+  touch-action: pan-y;
 }
 .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
 .ps-row::-webkit-scrollbar{ display:none; }
 
 /* 1 / 2 / 3 cards por vez */
 .ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
-@media (min-width:640px){
-  .ps-card{ flex-basis: calc((100% - var(--ps-gap)) / 2); }
-}
-@media (min-width:1024px){
-  .ps-card{ flex-basis: calc((100% - (2 * var(--ps-gap))) / 3); } /* 3 cards */
-}
+@media (min-width:640px){ .ps-card{ flex-basis: calc((100% - var(--ps-gap))/2); } }
+@media (min-width:1024px){ .ps-card{ flex-basis: calc((100% - (2*var(--ps-gap)))/3); } }
 
 /* setas (desktop) */
 .ps-arrow{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px; height: 36px;
-  border: none; border-radius: 999px;
-  background: rgba(0,0,0,.14);
-  color: #fff; font-size: 20px; line-height: 1;
-  display: none;
-  align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: transform .18s ease, background .18s ease, opacity .18s ease;
-  opacity: .95;
-  backdrop-filter: saturate(120%) blur(2px);
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:36px; height:36px; border:none; border-radius:999px;
+  background:rgba(0,0,0,.14); color:#fff; font-size:20px; line-height:1;
+  display:none; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .18s ease, background .18s ease, opacity .18s ease;
+  opacity:.95; backdrop-filter:saturate(120%) blur(2px); z-index:2;
 }
-.ps-arrow:hover{ transform: translateY(-50%) scale(1.06); background: rgba(0,0,0,.22); }
-.ps-arrow:disabled{ opacity: .35; cursor: default; }
-.ps-left{  left: 4px; }
-.ps-right{ right: 4px; }
-@media (min-width:1024px){
-  .ps-arrow{ display: inline-flex; }
-}
+.ps-arrow:hover{ transform:translateY(-50%) scale(1.06); background:rgba(0,0,0,.22); }
+.ps-arrow:disabled{ opacity:.35; cursor:default; }
+.ps-arrow:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
+.ps-left{ left:4px; } .ps-right{ right:4px; }
+@media (min-width:1024px){ .ps-arrow{ display:inline-flex; } }
 
 /* cartão */
-.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:16px; outline: none; }
-.ps-cardBtn:focus-visible .ps-media{ box-shadow: 0 0 0 3px rgba(54,39,39,.35); }
+.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:20px; outline: none; }
+.ps-cardBtn:focus-visible .ps-media{ box-shadow:0 0 0 3px rgba(54,39,39,.35); }
 
 .ps-media{
-  position:relative;
-  width:100%;
-  aspect-ratio:16/9;
-  background:#e5e5e5;
-  border-radius:16px;
-  overflow:hidden;
-  height: clamp(180px, 20vw, 290px);
-  transition: transform .18s ease, box-shadow .18s ease;
-  will-change: transform;
+  position:relative; width:100%; aspect-ratio:16/9; background:#e5e5e5;
+  border-radius:20px; overflow:hidden; height:clamp(180px,20vw,290px);
+  transition: transform .18s ease, box-shadow .18s ease; will-change: transform;
 }
-.ps-cardBtn:hover .ps-media{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.ps-cardBtn:hover .ps-media{ transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,.08); }
 
 .ps-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 .ps-grad{ position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0)); }
@@ -420,46 +390,28 @@ export default {
 
 /* skeleton */
 .ps-skel{
-  position:absolute; inset:0; background:
-    linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%);
+  position:absolute; inset:0;
+  background:linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%);
   animation: ps-shimmer 1.1s infinite linear;
 }
-@keyframes ps-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@keyframes ps-shimmer{ 0%{ background-position:-200px 0; } 100%{ background-position:200px 0; } }
 
-/* dots (mobile/tablet) */
-.ps-dots{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin-top: 22px;              /* 👈 mais respiro abaixo dos cards */
-}
-@media (min-width:640px){
-  .ps-dots{ margin-top: 24px; }  /* tablet um pouco mais */
-}
-.ps-dot{
-  width:8px; height:8px; border-radius:50%;
-  background-color: rgba(0,0,0,0.2);
-  cursor:pointer; transition: all .2s ease;
-}
-.ps-dot.active{
-  background-color:#362727;
-  width:24px; border-radius:4px;
-}
-@media (min-width:1024px){
-  .ps-dots{ display:none; }
-}
+/* dots */
+.ps-dots{ display:flex; justify-content:center; gap:10px; margin-top:22px; }
+@media (min-width:640px){ .ps-dots{ margin-top:24px; } }
+.ps-dot{ width:8px; height:8px; border-radius:50%; background-color:rgba(0,0,0,0.2); cursor:pointer; transition:all .2s ease; }
+.ps-dot.active{ background-color:#362727; width:24px; border-radius:4px; }
+.ps-dot:focus-visible{ outline:3px solid #362727; outline-offset:2px; }
+@media (min-width:1024px){ .ps-dots{ display:none; } }
 
 /* modal */
 .ps-fade-enter-active,.ps-fade-leave-active{ transition:opacity .18s ease; }
 .ps-fade-enter-from,.ps-fade-leave-to{ opacity:0; }
 
 .ps-backdrop{
-  position:fixed;
-  left:0; top:0;
-  width:100vw; height:100vh;
-  z-index:999999;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.7);
+  position:fixed; left:0; top:0; width:100vw; height:100vh;
+  z-index:999999; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.82); /* 👈 mais escuro */
 }
 .ps-panel{ width:min(1200px,92vw); position:relative; }
 
@@ -470,25 +422,39 @@ export default {
   display:inline-flex; align-items:center; justify-content:center;
 }
 
+/* área grande da imagem */
 .ps-view{ position:relative; background:rgba(0,0,0,.35); border-radius:12px; overflow:hidden; }
 .ps-big{ display:block; width:100%; height:70vh; object-fit:contain; background:#000; }
 
+/* setas dentro do modal — centralizadas e afastadas das bordas */
 .ps-nav{
   position:absolute; top:50%; transform:translateY(-50%);
-  border:none; padding:10px 14px; border-radius:999px;
-  background:rgba(255,255,255,.15); color:#fff; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:clamp(36px,4.2vw,48px); height:clamp(36px,4.2vw,48px);
+  border:none; padding:0; border-radius:999px;
+  background:rgba(255,255,255,.18); color:#fff; cursor:pointer;
+  transition:background .18s ease, transform .18s ease;
 }
+.ps-nav:hover{ background:rgba(255,255,255,.26); transform:translateY(-50%) scale(1.04); }
 .ps-nav:disabled{ opacity:.4; cursor:default; }
-.ps-prev{ left:8px; } .ps-next{ right:8px; }
+.ps-nav:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
+
+.ps-prev{ left:10px; }
+.ps-next{ right:10px; }
+@media (min-width:1024px){
+  .ps-prev{ left:18px; }
+  .ps-next{ right:18px; }
+}
 
 .ps-count{ position:absolute; left:0; right:0; bottom:8px; text-align:center; color:#fff; opacity:.9; }
 
+/* thumbs */
 .ps-thumbs{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; margin-top:12px; }
 .ps-thumb{ border:2px solid transparent; border-radius:8px; overflow:hidden; padding:0; background:none; cursor:pointer; }
 .ps-thumb.active{ border-color:#fff; }
 .ps-thumb img{ display:block; width:100%; height:70px; object-fit:cover; }
 
-@media (prefers-reduced-motion: reduce) {
-  .ps-row, .ps-media, .ps-arrow { scroll-behavior: auto; transition: none !important; }
+@media (prefers-reduced-motion: reduce){
+  .ps-row, .ps-media, .ps-arrow { scroll-behavior:auto; transition:none !important; }
 }
 </style>
