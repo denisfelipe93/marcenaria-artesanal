@@ -56,6 +56,7 @@
     </v-card>
     <img :src="logo" class="hero-logo-mobile" />
   </div>
+
   <div
     v-else
     class="headerContainer"
@@ -107,28 +108,16 @@ import TabsNavegation from "@/components/Tabs/TabsNavegation";
 
 export default {
   name: "Hero",
-  components: {
-    TabsNavegation,
-    TabCards,
-  },
+  components: { TabsNavegation, TabCards },
   data() {
     return {
       menuOpen: false,
       windowWidth: window.innerWidth,
       logo: `${new URL("@/assets/images/logo.WebP", import.meta.url)}`,
       tabs: [
-        {
-          name: "HISTÓRIA",
-          anchor: "#history",
-        },
-        {
-          name: "PROJETOS",
-          anchor: "#portifolio",
-        },
-        {
-          name: "CONTATO",
-          anchor: "#contact",
-        },
+        { name: "HISTÓRIA", anchor: "#history" },
+        { name: "PROJETOS", anchor: "#portifolio" },
+        { name: "CONTATO",  anchor: "#contact" },
       ],
       portifolioTabs: [
         {
@@ -138,7 +127,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/background4.WebP",
+            "@/assets/heroCards/a-13-1920x1080.webp", // DESIGN
             import.meta.url
           )}`,
           active: false,
@@ -151,7 +140,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/background.WebP",
+            "@/assets/heroCards/a-28-1920x1080.webp", // BELEZA
             import.meta.url
           )}`,
           active: false,
@@ -164,7 +153,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/background2.WebP",
+            "@/assets/heroCards/background2.WebP", // SENTIDO (volta)
             import.meta.url
           )}`,
           active: false,
@@ -173,43 +162,30 @@ export default {
       ],
       drawer: null,
       menuMobile: [
-        { tab: "HOME", anchor: "hero" },
+        { tab: "HOME",     anchor: "hero" },
         { tab: "HISTÓRIA", anchor: "history" },
-        { tab: "CONTATO", anchor: "contact" },
+        { tab: "CONTATO",  anchor: "contact" },
         { tab: "PROJETOS", anchor: "portifolio" },
       ],
       heroBackground: `${new URL(
-        "../../../../assets/heroCards/background.WebP",
+        "../../../../assets/heroCards/a-28-1920x1080.webp", // padrão do Hero
         import.meta.url
       )}`,
       hovering: false,
       linkIcons: [
-        {
-          ref: "https://pt-br.facebook.com/marcenariartesanal/",
-          icon: ["fab", "fa-facebook-f"],
-        },
-        {
-          ref: "https://www.instagram.com/marcenariaartesanal/?hl=en",
-          icon: ["fab", "fa-instagram"],
-        },
-        {
-          ref: "https://wa.me/message/YRG5PWGMPL73G1",
-          icon: ["fab", "fa-whatsapp"],
-        },
+        { ref: "https://pt-br.facebook.com/marcenariartesanal/", icon: ["fab", "fa-facebook-f"] },
+        { ref: "https://www.instagram.com/marcenariaartesanal/?hl=en", icon: ["fab", "fa-instagram"] },
+        { ref: "https://wa.me/message/YRG5PWGMPL73G1", icon: ["fab", "fa-whatsapp"] },
       ],
       sloganColor: "white",
     };
   },
   mounted() {
-    this.$nextTick(() => {
-      window.addEventListener("resize", this.onResize);
-    });
+    this.$nextTick(() => window.addEventListener("resize", this.onResize));
   },
-
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
   },
-
   methods: {
     onResize() {
       this.windowWidth = window.innerWidth;
@@ -217,16 +193,12 @@ export default {
     scrollToDrawer(section) {
       this.drawer = !this.drawer;
       const element = document.getElementById(section);
-      element.scrollIntoView({
-        behavior: "smooth",
-      });
+      element.scrollIntoView({ behavior: "smooth" });
     },
     scrollTo(section) {
       this.drawer = !this.drawer;
       const element = document.getElementById(section);
-      element.scrollIntoView({
-        behavior: "smooth",
-      });
+      element.scrollIntoView({ behavior: "smooth" });
     },
     changeBackground(background) {
       this.heroBackground = background;
@@ -241,8 +213,7 @@ export default {
 <style lang="css" scoped>
 .hero-container {
   height: 100vh;
-  background: url("../../../../assets/heroCards/background.WebP") no-repeat
-    center;
+  background: url("../../../../assets/heroCards/a-28-1920x1080.webp") no-repeat center; /* padrão mobile */
   background-size: cover;
 }
 .hero-open-menu-icon-mobile {
@@ -300,7 +271,6 @@ export default {
   list-style: none;
   margin-top: 3em;
 }
-
 .hero-nav-items li {
   width: 60vw;
   height: 70px;
@@ -310,9 +280,7 @@ export default {
   font-size: 20px;
   line-height: 70px;
 }
-.hero-nav-icon-desktop {
-  display: none;
-}
+.hero-nav-icon-desktop { display: none; }
 .hero-logo-mobile {
   position: absolute;
   top: 40vh;
@@ -321,9 +289,7 @@ export default {
 }
 
 @media (min-width: 1200px) {
-  .hero-open-menu-icon-mobile {
-    display: none;
-  }
+  .hero-open-menu-icon-mobile { display: none; }
 }
 .headerContainer {
   display: flex;
@@ -346,16 +312,9 @@ export default {
   max-width: 1300px;
   height: 20vh;
 }
-.tabStyle {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
+.tabStyle { display: flex; justify-content: flex-end; align-items: center; }
+.logo     { display: flex; align-items: center; justify-content: flex-start; }
+
 .titleContainer {
   box-sizing: border-box;
   display: flex;
@@ -366,110 +325,28 @@ export default {
   max-width: 90em;
   margin: 0 auto;
 }
-.titleContent {
-  display: flex;
-  justify-content: center;
-  flex-flow: row nowrap;
-  width: 100%;
-}
+.titleContent { display: flex; justify-content: center; flex-flow: row nowrap; width: 100%; }
 .titleContent div > h1 {
-  font-size: 1.8em;
-  color: white;
-  transition: 0.4s;
-  font-family: Arboria-Bold, sans-serif;
+  font-size: 1.8em; color: white; transition: 0.4s; font-family: Arboria-Bold, sans-serif;
 }
-.titleContent div > h1 > span {
-  font-family: Arboria-Light, sans-serif;
-  opacity: 0.6;
-  text-wrap: none;
-}
-.separator {
-  border-bottom: 2px groove white;
-  box-sizing: border-box;
-  margin-bottom: 17px;
-  margin-right: 21px;
-  margin-left: 21px;
-  width: 100%;
-}
+.titleContent div > h1 > span { font-family: Arboria-Light, sans-serif; opacity: 0.6; text-wrap: none; }
+.separator { border-bottom: 2px groove white; box-sizing: border-box; margin-bottom: 17px; margin-right: 21px; margin-left: 21px; width: 100%; }
 
-.contactContainer {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
+.contactContainer { margin: 0; padding: 0; width: 100%; }
 .portfolioTabs {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  width: 100%;
-  color: white;
-  height: 100%;
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-around;
+  padding: 0; margin: 0; box-sizing: border-box; width: 100%; color: white; height: 100%;
+  display: flex; flex-wrap: nowrap; justify-content: space-around;
 }
-.menuButtons {
-  cursor: pointer;
-  font-family: Arboria-Light;
-}
-.menuButtons:focus {
-  transition: 0.5s;
-  background-color: rgba(255, 255, 255, 0.38);
-  border: 1px solid white;
-}
-.containerIcons {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  width: 170px;
-  margin: 0 auto;
-  margin-top: 3em;
-}
-.footer-social-icons {
-  color: rgb(255, 255, 255);
-  border: 1px solid rgb(255, 255, 255);
-  border-radius: 50%;
-  padding: 8px 8px;
-  height: 18px;
-  width: 20px;
-  margin-right: 0;
-}
-.menuContainer {
-  display: flex;
-  flex-flow: column nowrap;
-  height: 100%;
-}
-.navContainer {
-  padding-left: 4em;
-  padding-right: 4em;
-}
-.hero-items {
-  margin: 2em 0 2em 0;
-  color: white;
-  list-style: none;
-}
-.hero-items:focus {
-  transition: 0.7s;
-  background-color: rgba(255, 255, 255, 0.15);
-}
-.listContainer {
-  margin-top: calc(50vh - 219px);
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  align-items: center;
-}
-.icons:hover {
-  transition: 0.7s;
-  background-color: rgba(255, 255, 255, 0.15);
-}
-.icons:focus {
-  transition: 0.7s;
-  padding: 0;
-  background-color: rgba(255, 255, 255, 0.15);
-}
-.background-filter {
-  background-color: black;
-  z-index: 999 !important;
-}
+.menuButtons { cursor: pointer; font-family: Arboria-Light; }
+.menuButtons:focus { transition: 0.5s; background-color: rgba(255, 255, 255, 0.38); border: 1px solid white; }
+.containerIcons { display: flex; flex-flow: row nowrap; justify-content: space-between; width: 170px; margin: 0 auto; margin-top: 3em; }
+.footer-social-icons { color: #fff; border: 1px solid #fff; border-radius: 50%; padding: 8px 8px; height: 18px; width: 20px; margin-right: 0; }
+.menuContainer { display: flex; flex-flow: column nowrap; height: 100%; }
+.navContainer { padding-left: 4em; padding-right: 4em; }
+.hero-items { margin: 2em 0; color: white; list-style: none; }
+.hero-items:focus { transition: 0.7s; background-color: rgba(255, 255, 255, 0.15); }
+.listContainer { margin-top: calc(50vh - 219px); display: flex; justify-content: center; text-align: center; align-items: center; }
+.icons:hover { transition: 0.7s; background-color: rgba(255, 255, 255, 0.15); }
+.icons:focus  { transition: 0.7s; padding: 0; background-color: rgba(255, 255, 255, 0.15); }
+.background-filter { background-color: black; z-index: 999 !important; }
 </style>
