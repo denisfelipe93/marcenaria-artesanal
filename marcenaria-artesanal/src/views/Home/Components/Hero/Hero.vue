@@ -4,8 +4,8 @@
     v-if="$vuetify.display.xs || $vuetify.display.sm || $vuetify.display.md"
     class="hero-container"
   >
-    <!-- camada glass cobrindo todo o hero -->
-    <div class="hero-glass" aria-hidden="true"></div>
+    <!-- Somente um degradê no TOPO para dar contraste ao logo/navbar -->
+    <div class="hero-topshade" aria-hidden="true"></div>
 
     <v-card style="z-index: 400">
       <div class="hero-nav-container">
@@ -68,8 +68,8 @@
     class="headerContainer"
     :style="{ backgroundImage: `url(${heroBackground})` }"
   >
-    <!-- camada glass cobrindo todo o hero -->
-    <div class="hero-glass" aria-hidden="true"></div>
+    <!-- Somente um degradê no TOPO para dar contraste ao logo/navbar -->
+    <div class="hero-topshade" aria-hidden="true"></div>
 
     <div>
       <nav class="navContainer">
@@ -136,7 +136,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/a-13-1920x1080.webp", // DESIGN
+            "@/assets/heroCards/a-13-1920x1080.webp",
             import.meta.url
           )}`,
           active: false,
@@ -149,7 +149,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/a-28-1920x1080.webp", // BELEZA
+            "@/assets/heroCards/a-28-1920x1080.webp",
             import.meta.url
           )}`,
           active: false,
@@ -162,7 +162,7 @@ export default {
           anchor: "#contact",
           card: false,
           background: `${new URL(
-            "@/assets/heroCards/background2.WebP", // SENTIDO
+            "@/assets/heroCards/background2.WebP",
             import.meta.url
           )}`,
           active: false,
@@ -177,7 +177,7 @@ export default {
         { tab: "PROJETOS", anchor: "portifolio" },
       ],
       heroBackground: `${new URL(
-        "../../../../assets/heroCards/a-28-1920x1080.webp", // padrão do Hero (desktop)
+        "../../../../assets/heroCards/a-28-1920x1080.webp",
         import.meta.url
       )}`,
       hovering: false,
@@ -198,9 +198,7 @@ export default {
     window.removeEventListener("resize", this.onResize);
   },
   methods: {
-    onResize() {
-      this.windowWidth = window.innerWidth;
-    },
+    onResize() { this.windowWidth = window.innerWidth; },
     scrollToDrawer(section) {
       this.drawer = !this.drawer;
       const element = document.getElementById(section);
@@ -211,39 +209,42 @@ export default {
       const element = document.getElementById(section);
       element.scrollIntoView({ behavior: "smooth" });
     },
-    changeBackground(background) {
-      this.heroBackground = background;
-    },
-    changeSlogan(color) {
-      this.sloganColor = color;
-    },
+    changeBackground(background) { this.heroBackground = background; },
+    changeSlogan(color) { this.sloganColor = color; },
   },
 };
 </script>
 
 <style lang="css" scoped>
 /* ===========================
-   Ajuste fino do efeito glass
+   CONTRASTE do topo do hero
    =========================== */
-:root{
-  --glass-alpha: 0.18; /* opacidade do escurecimento (0.12–0.28)  */
-  --glass-blur:  6px;  /* intensidade do blur (4–10px)           */
-}
+/* Ajuste fino do degradê do topo */
+.hero-container,
+.headerContainer { --topshade-a: 0.38; }  /* 0.30–0.50 */
 
-.hero-glass{
+.hero-topshade{
   position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,var(--glass-alpha)); /* leve escurecido para garantir contraste */
-  backdrop-filter: blur(var(--glass-blur)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
-  pointer-events: none; /* não bloqueia clique/hover */
+  top: 0; left: 0; right: 0;
+  height: 24vh;              /* ajuste a faixa do topo aqui */
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,var(--topshade-a)) 0%,
+    rgba(0,0,0,calc(var(--topshade-a) - 0.12)) 55%,
+    rgba(0,0,0,0) 100%
+  );
+  pointer-events: none;
   z-index: 0;
 }
 
-/* garantir que conteúdo fique acima do glass */
-.headerContainer, .hero-container { position: relative; }
-.headerContainer > *:not(.hero-glass),
-.hero-container > *:not(.hero-glass){ position: relative; z-index: 1; }
+/* Qualquer conteúdo fica acima do degradê */
+.hero-container, .headerContainer { position: relative; }
+.hero-container > *:not(.hero-topshade),
+.headerContainer > *:not(.hero-topshade) { position: relative; z-index: 1; }
+
+/* Reforço sutil no logo e itens do menu (não altera layout) */
+.logo { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)); }
+.tabStyle, .tabStyle * { text-shadow: 0 1px 10px rgba(0,0,0,.55); }
 
 /* ====== MOBILE ====== */
 .hero-container {
@@ -264,11 +265,11 @@ export default {
   transition: background-image 0.5s ease-in-out;
   background-repeat: no-repeat;
   background-position: center center;
-  background-attachment: fixed;
+  background-attachment: fixed; /* mantido */
   background-size: cover;
 }
 
-/* ====== Destaque APENAS nas letras do H1 (mantido do seu código) ====== */
+/* ====== Destaque do título ====== */
 .titleContent div > h1 {
   text-shadow:
     0 2px 12px rgba(0,0,0,.45),
@@ -283,7 +284,7 @@ export default {
 }
 .titleContent div > h1 > span { opacity: 0.8; }
 
-/* ====== Restante do seu CSS original ====== */
+/* ====== Seu CSS original (inalterado) ====== */
 .hero-open-menu-icon-mobile {
   cursor: pointer;
   height: 25px;
@@ -320,18 +321,46 @@ export default {
 .headerContainer nav { display: flex; justify-content: space-between; margin: 0 auto; max-width: 1300px; height: 20vh; }
 .tabStyle { display: flex; justify-content: flex-end; align-items: center; }
 .logo     { display: flex; align-items: center; justify-content: flex-start; }
-.titleContainer { box-sizing: border-box; display: flex; flex-flow: column nowrap; justify-content: flex-end; align-items: center; height: 40vh; max-width: 90em; margin: 0 auto; }
+
+.titleContainer {
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  height: 40vh;
+  max-width: 90em;
+  margin: 0 auto;
+}
 .titleContent { display: flex; justify-content: center; flex-flow: row nowrap; width: 100%; }
-.separator { border-bottom: 2px groove white; box-sizing: border-box; margin-bottom: 17px; margin-right: 21px; margin-left: 21px; width: 100%; }
+
+.separator {
+  border-bottom: 2px groove white;
+  box-sizing: border-box;
+  margin-bottom: 17px;
+  margin-right: 21px;
+  margin-left: 21px;
+  width: 100%;
+}
 .contactContainer { margin: 0; padding: 0; width: 100%; }
-.portfolioTabs { padding: 0; margin: 0; box-sizing: border-box; width: 100%; color: white; height: 100%; display: flex; flex-wrap: nowrap; justify-content: space-around; }
+.portfolioTabs {
+  padding: 0; margin: 0; box-sizing: border-box; width: 100%; color: white; height: 100%;
+  display: flex; flex-wrap: nowrap; justify-content: space-around;
+}
 .menuButtons { cursor: pointer; font-family: Arboria-Light; }
 .menuButtons:focus {
   transition: 0.5s;
   background-color: rgba(255, 255, 255, 0.38);
   border: 1px solid white;
 }
-.containerIcons { display: flex; flex-flow: row nowrap; justify-content: space-between; width: 170px; margin: 0 auto; margin-top: 3em; }
+.containerIcons {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: 170px;
+  margin: 0 auto;
+  margin-top: 3em;
+}
 .footer-social-icons { color: #fff; border: 1px solid #fff; border-radius: 50%; padding: 8px 8px; height: 18px; width: 20px; margin-right: 0; }
 .menuContainer { display: flex; flex-flow: column nowrap; height: 100%; }
 .navContainer { padding-left: 4em; padding-right: 4em; }
