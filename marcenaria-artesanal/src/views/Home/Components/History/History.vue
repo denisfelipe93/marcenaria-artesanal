@@ -118,7 +118,7 @@ export default {
     return {
       imgCover,
       showVideo: true,
-      videoId: 'shopq-fKYwE',
+      videoId: 'EzirQte5neU', // <- ID atualizado
       useNoCookie: true,
       autoplay: 0,
       mute: 0,
