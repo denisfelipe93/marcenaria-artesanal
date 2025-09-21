@@ -122,7 +122,7 @@ export default {
     return {
       menuOpen: false,
       windowWidth: window.innerWidth,
-      logo: `${new URL("@/assets/images/logo.WebP", import.meta.url)}`,
+      logo: `${new URL("@/assets/images/logo.svg", import.meta.url)}`,
       tabs: [
         { name: "HISTÓRIA", anchor: "#history" },
         { name: "PROJETOS", anchor: "#portifolio" },
@@ -219,14 +219,13 @@ export default {
 /* ===========================
    CONTRASTE do topo do hero
    =========================== */
-/* Ajuste fino do degradê do topo */
 .hero-container,
 .headerContainer { --topshade-a: 0.38; }  /* 0.30–0.50 */
 
 .hero-topshade{
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 24vh;              /* ajuste a faixa do topo aqui */
+  height: 24vh;              /* faixa de contraste do topo */
   background: linear-gradient(
     to bottom,
     rgba(0,0,0,var(--topshade-a)) 0%,
@@ -237,12 +236,12 @@ export default {
   z-index: 0;
 }
 
-/* Qualquer conteúdo fica acima do degradê */
+/* conteúdo acima do degradê */
 .hero-container, .headerContainer { position: relative; }
 .hero-container > *:not(.hero-topshade),
 .headerContainer > *:not(.hero-topshade) { position: relative; z-index: 1; }
 
-/* Reforço sutil no logo e itens do menu (não altera layout) */
+/* reforço sutil de leitura (não muda layout) */
 .logo { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)); }
 .tabStyle, .tabStyle * { text-shadow: 0 1px 10px rgba(0,0,0,.55); }
 
@@ -251,6 +250,17 @@ export default {
   height: 100vh;
   background: url("../../../../assets/heroCards/a-28-1920x1080.webp") no-repeat center;
   background-size: cover;
+}
+
+/* tamanho do LOGO no MOBILE (centralizado e com limite) */
+.hero-logo-mobile {
+  position: absolute;
+  top: 40vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(220px, 60vw, 420px); /* ajuste aqui se quiser */
+  height: auto;
+  z-index: 10;
 }
 
 /* ====== DESKTOP ====== */
@@ -265,8 +275,14 @@ export default {
   transition: background-image 0.5s ease-in-out;
   background-repeat: no-repeat;
   background-position: center center;
-  background-attachment: fixed; /* mantido */
+  background-attachment: fixed;
   background-size: cover;
+}
+
+/* tamanho do LOGO no DESKTOP */
+.logo {
+  width: clamp(150px, 12vw, 200px);
+  height: auto;
 }
 
 /* ====== Destaque do título ====== */
@@ -284,7 +300,7 @@ export default {
 }
 .titleContent div > h1 > span { opacity: 0.8; }
 
-/* ====== Seu CSS original (inalterado) ====== */
+/* ====== restante do seu CSS ====== */
 .hero-open-menu-icon-mobile {
   cursor: pointer;
   height: 25px;
@@ -315,7 +331,6 @@ export default {
 .hero-nav-items { padding: 90px 0 0; color: white; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; list-style: none; margin-top: 3em; }
 .hero-nav-items li { width: 60vw; height: 70px; padding-left: 40px; text-align: left; font-family: Arboria-Medium; font-size: 20px; line-height: 70px; }
 .hero-nav-icon-desktop { display: none; }
-.hero-logo-mobile { position: absolute; top: 40vh; left: calc(50vw - 158px); z-index: 10; }
 
 @media (min-width: 1200px) { .hero-open-menu-icon-mobile { display: none; } }
 .headerContainer nav { display: flex; justify-content: space-between; margin: 0 auto; max-width: 1300px; height: 20vh; }
