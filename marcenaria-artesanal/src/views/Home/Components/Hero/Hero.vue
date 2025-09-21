@@ -271,7 +271,7 @@ export default {
   top: 44vh;
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(220px, 60vw, 420px);
+  width: clamp(260px, 70vw, 560px);
   height: auto;
   z-index: 10;
 }
