@@ -420,4 +420,9 @@ export default {
 .tabStyle :deep(.v-btn:hover .tab-title){
   color: rgba(255,255,255,.96) !important;
 }
+
+.titleContent div > h1 {
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important; /* garante se houver stroke */
+}
 </style>

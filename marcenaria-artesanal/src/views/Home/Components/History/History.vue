@@ -107,7 +107,7 @@
 <script>
 import imgCover from '@/assets/history/cover.png'
 import logoSvg from '@/assets/history/martesanal.svg'
-import img1 from '@/assets/history/img1.jpg'
+import img1 from '@/assets/history/a13.webp'
 
 export default {
   name: 'History',
