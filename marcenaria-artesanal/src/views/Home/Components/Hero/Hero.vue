@@ -138,8 +138,9 @@ export default {
       logo: `${new URL("@/assets/images/logo.svg", import.meta.url)}`,
       tabs: [
         { name: "HISTÓRIA", anchor: "#history" },
-        { name: "PROJETOS", anchor: "#portifolio" },
+        { name: "COMO FUNCIONA", anchor: "#how-it-works" },
         { name: "CONTATO",  anchor: "#contact" },
+        { name: "PROJETOS", anchor: "#portifolio" },
       ],
       portifolioTabs: [
         {
@@ -186,6 +187,7 @@ export default {
       menuMobile: [
         { tab: "HOME",     anchor: "hero" },
         { tab: "HISTÓRIA", anchor: "history" },
+        { tab: "COMO FUNCIONA", anchor: "how-it-works" },
         { tab: "CONTATO",  anchor: "contact" },
         { tab: "PROJETOS", anchor: "portifolio" },
       ],
@@ -314,7 +316,7 @@ export default {
 .titleContent div > h1 > span { opacity: 0.8; }
 
 /* ====== BOTÕES (MOBILE) ====== */
-/* Hambúrguer — fundo PRETO + blur (discreto, não circularzão) */
+/* Hambúrguer — fundo PRETO + blur */
 .burger-btn{
   position: fixed;
   right: 16px;
