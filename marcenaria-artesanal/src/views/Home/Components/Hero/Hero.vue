@@ -437,4 +437,9 @@ export default {
 .icons:hover { transition: 0.7s; background-color: rgba(255, 255, 255, 0.15); }
 .icons:focus { transition: 0.7s; padding: 0; background-color: rgba(255, 255, 255, 0.15); }
 .background-filter { background-color: black; z-index: 999 !important; }
+
+.titleContent div > h1 {
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important; /* garante se houver stroke */
+}
 </style>

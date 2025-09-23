@@ -108,7 +108,7 @@
 
 <script>
 import imgCover from '@/assets/history/cover.jpg'
-import img1 from '@/assets/history/img1.jpg'
+import img1 from '@/assets/history/a-13-1920x1080.webp'
 import img2 from '@/assets/history/img2.jpg'
 import img3 from '@/assets/history/img3.jpg'
 
