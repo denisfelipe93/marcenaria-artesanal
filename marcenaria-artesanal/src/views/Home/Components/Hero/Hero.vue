@@ -4,12 +4,11 @@
     v-if="$vuetify.display.xs || $vuetify.display.sm || $vuetify.display.md"
     class="hero-container"
   >
-    <!-- Degradê no topo para dar contraste ao logo/navbar -->
     <div class="hero-topshade" aria-hidden="true"></div>
 
     <v-card style="z-index: 400">
       <div class="hero-nav-container">
-        <!-- BOTÃO HAMBÚRGUER (preto + blur) -->
+        <!-- Hambúrguer -->
         <button
           v-if="!drawer"
           class="burger-btn"
@@ -19,7 +18,7 @@
           <font-awesome-icon :icon="['fas','fa-bars']" class="burger-ico" />
         </button>
 
-        <!-- BOTÃO FECHAR (X no MESMO lugar, sem círculo) -->
+        <!-- Fechar -->
         <button
           v-else
           class="close-fab-btn"
@@ -39,7 +38,7 @@
           <div class="menuContainer">
             <div class="containerIcons">
               <div v-for="(item, index) in linkIcons" :key="index">
-                <a :href="item.ref">
+                <a :href="item.ref" target="_blank" rel="noopener">
                   <font-awesome-icon
                     :icon="item.icon"
                     class="footer-social-icons icons"
@@ -47,6 +46,7 @@
                 </a>
               </div>
             </div>
+
             <div class="listContainer">
               <ul>
                 <li
@@ -66,12 +66,10 @@
           </div>
         </v-navigation-drawer>
 
-        <!-- (mantido) -->
         <img :src="logo" class="hero-nav-icon-desktop" />
       </div>
     </v-card>
 
-    <!-- LOGO MOBILE (maior) -->
     <img :src="logo" class="hero-logo-mobile" />
   </div>
 
@@ -81,7 +79,6 @@
     class="headerContainer"
     :style="{ backgroundImage: `url(${heroBackground})` }"
   >
-    <!-- Degradê no topo para dar contraste ao logo/navbar -->
     <div class="hero-topshade" aria-hidden="true"></div>
 
     <div>
@@ -96,6 +93,7 @@
         <TabsNavegation :tabs="tabs" class="tabStyle" />
       </nav>
     </div>
+
     <div class="titleContainer">
       <div class="titleContent">
         <div
@@ -112,6 +110,7 @@
           :style="{ borderBottom: `2px groove ${sloganColor}` }"
         />
       </div>
+
       <div class="portfolioTabs">
         <TabCards
           :tabs="portifolioTabs"
@@ -136,12 +135,14 @@ export default {
       menuOpen: false,
       windowWidth: window.innerWidth,
       logo: `${new URL("@/assets/images/logo.svg", import.meta.url)}`,
+      // DESKTOP TABS
       tabs: [
-        { name: "HISTÓRIA", anchor: "#history" },
-        { name: "COMO FUNCIONA", anchor: "#how-it-works" },
-        { name: "CONTATO",  anchor: "#contact" },
-        { name: "PROJETOS", anchor: "#portifolio" },
+        { name: "HISTÓRIA",      anchor: "#history" },
+        { name: "COMO FUNCIONA", anchor: "#how-it-works" }, // novo
+        { name: "CONTATO",       anchor: "#contact" },
+        { name: "PROJETOS",      anchor: "#portifolio" },
       ],
+      // Cards do hero
       portifolioTabs: [
         {
           name: "cardSala",
@@ -149,10 +150,7 @@ export default {
           text: "Pensamos em todos os detalhes para trazer o melhor design dentro do seu ambiente.",
           anchor: "#contact",
           card: false,
-          background: `${new URL(
-            "@/assets/heroCards/a-13-1920x1080.webp",
-            import.meta.url
-          )}`,
+          background: `${new URL("@/assets/heroCards/a-13-1920x1080.webp", import.meta.url)}`,
           active: false,
           slogan: "white",
         },
@@ -162,10 +160,7 @@ export default {
           text: "Produtos de alta qualidade que conjugam tecnologia de ponta e rigor artesanal.",
           anchor: "#contact",
           card: false,
-          background: `${new URL(
-            "@/assets/heroCards/a-28-1920x1080.webp",
-            import.meta.url
-          )}`,
+          background: `${new URL("@/assets/heroCards/a-28-1920x1080.webp", import.meta.url)}`,
           active: false,
           slogan: "white",
         },
@@ -175,26 +170,22 @@ export default {
           text: "Trazendo a elegância de sua essência para dentro projeto.",
           anchor: "#contact",
           card: false,
-          background: `${new URL(
-            "@/assets/heroCards/background2.WebP",
-            import.meta.url
-          )}`,
+          background: `${new URL("@/assets/heroCards/background2.WebP", import.meta.url)}`,
           active: false,
           slogan: "white",
         },
       ],
+      // MOBILE MENU
       drawer: null,
       menuMobile: [
-        { tab: "HOME",     anchor: "hero" },
-        { tab: "HISTÓRIA", anchor: "history" },
-        { tab: "COMO FUNCIONA", anchor: "how-it-works" },
-        { tab: "CONTATO",  anchor: "contact" },
-        { tab: "PROJETOS", anchor: "portifolio" },
+        { tab: "HOME",          anchor: "hero" },
+        { tab: "HISTÓRIA",      anchor: "history" },
+        { tab: "COMO FUNCIONA", anchor: "how-it-works" }, // novo
+        { tab: "CONTATO",       anchor: "contact" },
+        { tab: "PROJETOS",      anchor: "portifolio" },
       ],
-      heroBackground: `${new URL(
-        "../../../../assets/heroCards/a-28-1920x1080.webp",
-        import.meta.url
-      )}`,
+      // BG hero
+      heroBackground: `${new URL("../../../../assets/heroCards/a-28-1920x1080.webp", import.meta.url)}`,
       hovering: false,
       linkIcons: [
         { ref: "https://pt-br.facebook.com/marcenariartesanal/", icon: ["fab", "fa-facebook-f"] },
@@ -209,20 +200,20 @@ export default {
       window.addEventListener("resize", this.onResize);
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener("resize", this.onResize);
   },
   methods: {
     onResize() { this.windowWidth = window.innerWidth; },
     scrollToDrawer(section) {
       this.drawer = false;
-      const element = document.getElementById(section);
-      element.scrollIntoView({ behavior: "smooth" });
+      const el = document.getElementById(section);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     },
     scrollTo(section) {
       this.drawer = false;
-      const element = document.getElementById(section);
-      element.scrollIntoView({ behavior: "smooth" });
+      const el = document.getElementById(section);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     },
     changeBackground(background) { this.heroBackground = background; },
     changeSlogan(color) { this.sloganColor = color; },
@@ -230,213 +221,178 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
-/* ===========================
-   CONTRASTE do topo do hero
-   =========================== */
+<style scoped>
+/* ===== Contraste topo ===== */
 .hero-container,
-.headerContainer { --topshade-a: 0.38; }  /* 0.30–0.50 */
+.headerContainer { --topshade-a: 0.38; }
 
 .hero-topshade{
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 24vh;              /* faixa de contraste do topo */
-  background: linear-gradient(
-    to bottom,
+  position:absolute; top:0; left:0; right:0; height:24vh;
+  background:linear-gradient(to bottom,
     rgba(0,0,0,var(--topshade-a)) 0%,
-    rgba(0,0,0,calc(var(--topshade-a) - 0.12)) 55%,
-    rgba(0,0,0,0) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
+    rgba(0,0,0,calc(var(--topshade-a) - .12)) 55%,
+    rgba(0,0,0,0) 100%);
+  pointer-events:none; z-index:0;
 }
+.hero-container, .headerContainer { position:relative; }
+.hero-container>*:not(.hero-topshade),
+.headerContainer>*:not(.hero-topshade){ position:relative; z-index:1; }
 
-/* conteúdo acima do degradê */
-.hero-container, .headerContainer { position: relative; }
-.hero-container > *:not(.hero-topshade),
-.headerContainer > *:not(.hero-topshade) { position: relative; z-index: 1; }
-
-/* reforço sutil de leitura (não muda layout) */
 .logo { filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)); }
 .tabStyle, .tabStyle * { text-shadow: 0 1px 10px rgba(0,0,0,.55); }
 
-/* ====== MOBILE ====== */
-.hero-container {
-  height: 100vh;
-  background: url("../../../../assets/heroCards/a-28-1920x1080.webp") no-repeat center;
-  background-size: cover;
+/* ===== Mobile ===== */
+.hero-container{
+  height:100vh;
+  background:url("../../../../assets/heroCards/a-28-1920x1080.webp") no-repeat center/cover;
+}
+.hero-logo-mobile{
+  position:absolute; top:44vh; left:50%; transform:translateX(-50%);
+  width:clamp(260px,70vw,560px); height:auto; z-index:10;
 }
 
-/* LOGO MOBILE — MAIOR (responsivo) */
-.hero-logo-mobile {
-  position: absolute;
-  top: 44vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(260px, 70vw, 560px);
-  height: auto;
-  z-index: 10;
+/* ===== Desktop ===== */
+.headerContainer{
+  display:flex; flex-flow:column nowrap; justify-content:space-between;
+  height:100vh; transition: background-image .5s ease-in-out;
+  background-repeat:no-repeat; background-position:center; background-attachment:fixed; background-size:cover;
 }
+.logo{ width:clamp(150px,12vw,200px); height:auto; }
 
-/* ====== DESKTOP ====== */
-.headerContainer {
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-between;
-  height: 100vh;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  transition: background-image 0.5s ease-in-out;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-  background-size: cover;
-}
-
-/* tamanho do LOGO no DESKTOP */
-.logo {
-  width: clamp(150px, 12vw, 200px);
-  height: auto;
-}
-
-/* ====== Destaque do título ====== */
-.titleContent div > h1 {
+.titleContent div>h1{
   text-shadow:
     0 2px 12px rgba(0,0,0,.45),
-    -1px 0 0 rgba(0,0,0,.70),
-     1px 0 0 rgba(0,0,0,.70),
-     0 -1px 0 rgba(0,0,0,.70),
-     0  1px 0 rgba(0,0,0,.70),
-    -1px -1px 0 rgba(0,0,0,.70),
-     1px  1px 0 rgba(0,0,0,.70),
-    -1px  1px 0 rgba(0,0,0,.70),
-     1px -1px 0 rgba(0,0,0,.70);
+    -1px 0 0 rgba(0,0,0,.70), 1px 0 0 rgba(0,0,0,.70),
+     0 -1px 0 rgba(0,0,0,.70), 0 1px 0 rgba(0,0,0,.70),
+    -1px -1px 0 rgba(0,0,0,.70), 1px 1px 0 rgba(0,0,0,.70),
+    -1px  1px 0 rgba(0,0,0,.70), 1px -1px 0 rgba(0,0,0,.70);
 }
-.titleContent div > h1 > span { opacity: 0.8; }
+.titleContent div>h1>span{ opacity:.8; }
 
-/* ====== BOTÕES (MOBILE) ====== */
-/* Hambúrguer — fundo PRETO + blur */
+/* ===== Botões mobile ===== */
 .burger-btn{
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  background: rgba(0,0,0,0.42);      /* preto translúcido */
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 12px;                /* levemente quadrado */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
-
-  cursor: pointer;
-  z-index: 700; /* abaixo do X (que fica 1001), acima do hero */
+  position:fixed; right:16px; bottom:16px; width:44px; height:44px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.42);
+  backdrop-filter:blur(8px) saturate(120%);
+  -webkit-backdrop-filter:blur(8px) saturate(120%);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.28);
+  cursor:pointer; z-index:700;
   transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
 }
-.burger-btn:hover{ transform: translateY(-1px); background: rgba(0,0,0,0.5); }
-.burger-btn:active{ transform: translateY(0); }
-.burger-btn:focus-visible{
-  outline: 2px solid rgba(255,255,255,0.75);
-  outline-offset: 2px;
-}
-.burger-ico{
-  width: 20px;
-  height: 20px;
-  color: #fff;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,.45));
-}
+.burger-btn:hover{ transform:translateY(-1px); background:rgba(0,0,0,.5); }
+.burger-btn:focus-visible{ outline:2px solid rgba(255,255,255,.75); outline-offset:2px; }
+.burger-ico{ width:20px; height:20px; color:#fff; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
 
-/* X — MESMA POSIÇÃO do hambúrguer, SEM círculo/fundo */
 .close-fab-btn{
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  background: transparent;  /* sem círculo */
-  border: none;
-  cursor: pointer;
-  z-index: 1001;            /* acima do drawer */
+  position:fixed; right:16px; bottom:16px; width:44px; height:44px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; border:none; cursor:pointer; z-index:1001;
 }
-.close-fab-ico{
-  width: 22px;
-  height: 22px;
-  color: #fff;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,.6)); /* dá legibilidade sem fundo */
-}
+.close-fab-ico{ width:22px; height:22px; color:#fff; filter: drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
 
-/* Limpamos estilos antigos que poderiam conflitar */
 .hero-open-menu-icon-mobile,
-.hero-close-menu-icon-mobile{ all: unset; }
+.hero-close-menu-icon-mobile{ all:unset; }
 
-/* ====== resto do seu CSS ====== */
-.hero-mobile-menu { position: fixed; top: 0; right: 0; background-color: #341818; opacity: 0.95; height: 100vh; z-index: 500; }
-.hero-nav-items { padding: 90px 0 0; color: white; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; list-style: none; margin-top: 3em; }
-.hero-nav-items li { width: 60vw; height: 70px; padding-left: 40px; text-align: left; font-family: Arboria-Medium; font-size: 20px; line-height: 70px; }
-.hero-nav-icon-desktop { display: none; }
+/* ===== Layout geral ===== */
+.hero-mobile-menu{ position:fixed; top:0; right:0; background:#341818; opacity:.95; height:100vh; z-index:500; }
+.hero-nav-items{ padding:90px 0 0; color:#fff; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; list-style:none; margin-top:3em; }
+.hero-nav-items li{ width:60vw; height:70px; padding-left:40px; text-align:left; font-family:Arboria-Medium; font-size:20px; line-height:70px; }
+.hero-nav-icon-desktop{ display:none; }
 
-@media (min-width: 1200px) {
-  .burger-btn, .close-fab-btn{ display: none; } /* botões só no mobile */
+@media (min-width:1200px){
+  .burger-btn, .close-fab-btn{ display:none; }
 }
 
-.headerContainer nav { display: flex; justify-content: space-between; margin: 0 auto; max-width: 1300px; height: 20vh; }
-.tabStyle { display: flex; justify-content: flex-end; align-items: center; }
-.logo     { display: flex; align-items: center; justify-content: flex-start; }
+.headerContainer nav{ display:flex; justify-content:space-between; margin:0 auto; max-width:1300px; height:20vh; }
+.tabStyle{ display:flex; justify-content:flex-end; align-items:center; }
+.logo{ display:flex; align-items:center; justify-content:flex-start; }
 
-.titleContainer {
-  box-sizing: border-box;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-end;
-  align-items: center;
-  height: 40vh;
-  max-width: 90em;
-  margin: 0 auto;
+.titleContainer{
+  box-sizing:border-box; display:flex; flex-flow:column nowrap; justify-content:flex-end; align-items:center;
+  height:40vh; max-width:90em; margin:0 auto;
 }
-.titleContent { display: flex; justify-content: center; flex-flow: row nowrap; width: 100%; }
-.separator {
-  border-bottom: 2px groove white;
-  box-sizing: border-box;
-  margin-bottom: 17px;
-  margin-right: 21px;
-  margin-left: 21px;
-  width: 100%;
+.titleContent{ display:flex; justify-content:center; flex-flow:row nowrap; width:100%; }
+.separator{ border-bottom:2px groove white; margin:0 21px 17px; width:100%; box-sizing:border-box; }
+.portfolioTabs{
+  width:100%; color:white; display:flex; justify-content:space-around;
 }
-.contactContainer { margin: 0; padding: 0; width: 100%; }
-.portfolioTabs {
-  padding: 0; margin: 0; box-sizing: border-box; width: 100%; color: white; height: 100%;
-  display: flex; flex-wrap: nowrap; justify-content: space-around;
+.menuButtons{ cursor:pointer; font-family:Arboria-Light; }
+.menuButtons:focus{ background-color:rgba(255,255,255,.38); border:1px solid white; transition:.5s; }
+.containerIcons{ display:flex; justify-content:space-between; width:170px; margin:3em auto 0; }
+.footer-social-icons{ color:#fff; border:1px solid #fff; border-radius:50%; padding:8px; height:18px; width:20px; }
+.menuContainer{ display:flex; flex-flow:column nowrap; height:100%; }
+.navContainer{ padding:0 4em; }
+.hero-items{ margin:2em 0; color:white; list-style:none; }
+.hero-items:focus{ background-color:rgba(255,255,255,.15); transition:.7s; }
+.listContainer{ margin-top:calc(50vh - 219px); display:flex; justify-content:center; text-align:center; align-items:center; }
+.icons:hover{ background-color:rgba(255,255,255,.15); transition:.7s; }
+.icons:focus{ padding:0; background-color:rgba(255,255,255,.15); transition:.7s; }
+.background-filter{ background-color:black; z-index:999 !important; }
+
+/* ===== Tabs (DESKTOP) — remover quadrado (overlay) e clarear texto ===== */
+/* zera opacidade de hover interna do Vuetify */
+.tabStyle :deep(.v-btn),
+.tabStyle :deep(.v-tab){ --v-hover-opacity: 0 !important; }
+
+/* elimina overlays/underlays */
+.tabStyle :deep(.v-btn__overlay),
+.tabStyle :deep(.v-btn__underlay){
+  background:transparent !important;
+  opacity:0 !important;
 }
-.menuButtons { cursor: pointer; font-family: Arboria-Light; }
-.menuButtons:focus {
-  transition: 0.5s;
-  background-color: rgba(255, 255, 255, 0.38);
-  border: 1px solid white;
+
+/* sem slider/fita */
+.tabStyle :deep(.v-tab__slider){ background:transparent !important; }
+
+/* estado base/hover/ativo (só cor do texto) */
+.tabStyle :deep(.v-tab),
+.tabStyle :deep(.v-btn.v-btn--variant-text),
+.tabStyle :deep(a),
+.tabStyle :deep(button){
+  background:transparent !important;
+  box-shadow:none !important;
+  color:rgba(255,255,255,.78);
+  transition:color .18s ease;
 }
-.containerIcons {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  width: 170px;
-  margin: 0 auto;
-  margin-top: 3em;
+.tabStyle :deep(.v-tab:hover),
+.tabStyle :deep(.v-btn.v-btn--variant-text:hover),
+.tabStyle :deep(a:hover),
+.tabStyle :deep(button:hover){
+  background:transparent !important;
+  color:rgba(255,255,255,.96) !important;
 }
-.footer-social-icons { color: #fff; border: 1px solid #fff; border-radius: 50%; padding: 8px 8px; height: 18px; width: 20px; margin-right: 0; }
-.menuContainer { display: flex; flex-flow: column nowrap; height: 100%; }
-.navContainer { padding-left: 4em; padding-right: 4em; }
-.hero-items { margin: 2em 0; color: white; list-style: none; }
-.hero-items:focus { transition: 0.7s; background-color: rgba(255,255,255,0.15); }
-.listContainer { margin-top: calc(50vh - 219px); display: flex; justify-content: center; text-align: center; align-items: center; }
-.icons:hover { transition: 0.7s; background-color: rgba(255, 255, 255, 0.15); }
-.icons:focus { transition: 0.7s; padding: 0; background-color: rgba(255, 255, 255, 0.15); }
-.background-filter { background-color: black; z-index: 999 !important; }
+.tabStyle :deep(.v-tab--selected),
+.tabStyle :deep(.v-btn--active),
+.tabStyle :deep(.router-link-active){
+  background:transparent !important;
+  box-shadow:none !important;
+  color:#fff !important;
+}
+
+/* foco acessível (no texto) */
+.tabStyle :deep(.v-tab:focus-visible),
+.tabStyle :deep(.v-btn.v-btn--variant-text:focus-visible),
+.tabStyle :deep(a:focus-visible),
+.tabStyle :deep(button:focus-visible){
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+
+/* ===== força clareamento também no conteúdo interno (Vuetify) ===== */
+.tabStyle :deep(.v-btn__content),
+.tabStyle :deep(.v-tab__content),
+.tabStyle :deep(.tab-link){
+  color: rgba(255,255,255,.78) !important;
+}
+.tabStyle :deep(.v-btn:hover .v-btn__content),
+.tabStyle :deep(.v-tab:hover .v-tab__content),
+.tabStyle :deep(.tab-link:hover){
+  color: rgba(255,255,255,.96) !important;
+}
+.tabStyle :deep(.v-btn--active .v-btn__content),
+.tabStyle :deep(.v-tab--selected .v-tab__content){
+  color: #fff !important;
+}
 </style>
