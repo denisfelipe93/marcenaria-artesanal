@@ -315,9 +315,7 @@ export default {
 }
 .titleContent{ display:flex; justify-content:center; flex-flow:row nowrap; width:100%; }
 .separator{ border-bottom:2px groove white; margin:0 21px 17px; width:100%; box-sizing:border-box; }
-.portfolioTabs{
-  width:100%; color:white; display:flex; justify-content:space-around;
-}
+.portfolioTabs{ width:100%; color:white; display:flex; justify-content:space-around; }
 .menuButtons{ cursor:pointer; font-family:Arboria-Light; }
 .menuButtons:focus{ background-color:rgba(255,255,255,.38); border:1px solid white; transition:.5s; }
 .containerIcons{ display:flex; justify-content:space-between; width:170px; margin:3em auto 0; }
@@ -331,68 +329,95 @@ export default {
 .icons:focus{ padding:0; background-color:rgba(255,255,255,.15); transition:.7s; }
 .background-filter{ background-color:black; z-index:999 !important; }
 
-/* ===== Tabs (DESKTOP) — remover quadrado (overlay) e clarear texto ===== */
-/* zera opacidade de hover interna do Vuetify */
-.tabStyle :deep(.v-btn),
-.tabStyle :deep(.v-tab){ --v-hover-opacity: 0 !important; }
-
-/* elimina overlays/underlays */
-.tabStyle :deep(.v-btn__overlay),
-.tabStyle :deep(.v-btn__underlay){
-  background:transparent !important;
-  opacity:0 !important;
-}
-
-/* sem slider/fita */
-.tabStyle :deep(.v-tab__slider){ background:transparent !important; }
-
-/* estado base/hover/ativo (só cor do texto) */
+/* ===== Tabs (DESKTOP) — remover quadrado/overlay e clarear texto ===== */
+/* 1) zera opacidades internas do Vuetify */
 .tabStyle :deep(.v-tab),
-.tabStyle :deep(.v-btn.v-btn--variant-text),
-.tabStyle :deep(a),
-.tabStyle :deep(button){
-  background:transparent !important;
-  box-shadow:none !important;
-  color:rgba(255,255,255,.78);
-  transition:color .18s ease;
+.tabStyle :deep(.v-btn){
+  --v-hover-opacity: 0 !important;
+  --v-activated-opacity: 0 !important;
+  --v-pressed-opacity: 0 !important;
 }
-.tabStyle :deep(.v-tab:hover),
-.tabStyle :deep(.v-btn.v-btn--variant-text:hover),
+/* 2) remove overlays/underlays/slider e bgs de containers */
+.tabStyle :deep(.v-btn__overlay),
+.tabStyle :deep(.v-btn__underlay),
+.tabStyle :deep(.v-tab__slider),
+.tabStyle :deep(.v-tabs),
+.tabStyle :deep(.v-slide-group),
+.tabStyle :deep(.v-slide-group__container),
+.tabStyle :deep(.v-slide-group__content){
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* 3) wrappers <ul>/<li> que possam pintar bg no hover */
+.tabStyle :deep(ul),
+.tabStyle :deep(li),
+.tabStyle :deep(li:hover),
+.tabStyle :deep(li:focus),
+.tabStyle :deep(li:active){
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* 4) âncoras/botões crus */
+.tabStyle :deep(a),
+.tabStyle :deep(button),
 .tabStyle :deep(a:hover),
 .tabStyle :deep(button:hover){
-  background:transparent !important;
-  color:rgba(255,255,255,.96) !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
+/* Estado base: texto levemente menos branco */
+.tabStyle :deep(.v-tab),
+.tabStyle :deep(.v-btn.v-btn--variant-text),
+.tabStyle :deep(.v-tab__content),
+.tabStyle :deep(.v-btn__content),
+.tabStyle :deep(a),
+.tabStyle :deep(button){
+  color: rgba(255,255,255,.78) !important;
+  transition: color .18s ease;
+}
+/* Hover: só o texto clareia (inclui conteúdo interno) */
+.tabStyle :deep(.v-tab:hover),
+.tabStyle :deep(.v-btn.v-btn--variant-text:hover),
+.tabStyle :deep(.v-tab:hover .v-tab__content),
+.tabStyle :deep(.v-btn.v-btn--variant-text:hover .v-btn__content),
+.tabStyle :deep(a:hover),
+.tabStyle :deep(button:hover){
+  color: rgba(255,255,255,.96) !important;
+}
+/* Ativo/selecionado: branco total e sem fundo */
 .tabStyle :deep(.v-tab--selected),
+.tabStyle :deep(.v-tab--selected .v-tab__content),
 .tabStyle :deep(.v-btn--active),
+.tabStyle :deep(.v-btn--active .v-btn__content),
 .tabStyle :deep(.router-link-active){
-  background:transparent !important;
-  box-shadow:none !important;
-  color:#fff !important;
+  color: #fff !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
-
-/* foco acessível (no texto) */
+/* Foco acessível no texto */
 .tabStyle :deep(.v-tab:focus-visible),
 .tabStyle :deep(.v-btn.v-btn--variant-text:focus-visible),
 .tabStyle :deep(a:focus-visible),
 .tabStyle :deep(button:focus-visible){
-  text-decoration:underline;
-  text-underline-offset:4px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-/* ===== força clareamento também no conteúdo interno (Vuetify) ===== */
-.tabStyle :deep(.v-btn__content),
-.tabStyle :deep(.v-tab__content),
-.tabStyle :deep(.tab-link){
-  color: rgba(255,255,255,.78) !important;
-}
-.tabStyle :deep(.v-btn:hover .v-btn__content),
-.tabStyle :deep(.v-tab:hover .v-tab__content),
-.tabStyle :deep(.tab-link:hover){
+/* ===== reforço final: clarear qualquer filho no hover (catch-all) ===== */
+.tabStyle :deep(.v-tab:hover *),
+.tabStyle :deep(.v-btn.v-btn--variant-text:hover *),
+.tabStyle :deep(a:hover *),
+.tabStyle :deep(button:hover *){
   color: rgba(255,255,255,.96) !important;
+  -webkit-text-fill-color: rgba(255,255,255,.96) !important; /* Safari */
 }
-.tabStyle :deep(.v-btn--active .v-btn__content),
-.tabStyle :deep(.v-tab--selected .v-tab__content){
-  color: #fff !important;
+/* caso use rótulos próprios */
+.tabStyle :deep(.tab-label),
+.tabStyle :deep(.tab-title){ transition: color .18s ease; }
+.tabStyle :deep(.v-tab:hover .tab-label),
+.tabStyle :deep(.v-tab:hover .tab-title),
+.tabStyle :deep(.v-btn:hover .tab-label),
+.tabStyle :deep(.v-btn:hover .tab-title){
+  color: rgba(255,255,255,.96) !important;
 }
 </style>

@@ -7,7 +7,7 @@
         aria-label="Projetos"
         ref="row"
         @scroll="onRowScroll"
-        @wheel="wheelScroll"
+        @wheel.passive="wheelScroll"
         @keydown="onRowKey"
         @mouseenter="focusRow"
         @pointerdown="pointerStart"
@@ -161,11 +161,15 @@ export default {
       activeIndex: -1,
       current: 0,
 
-      // arrasto
+      // arrasto / axis-lock
       isDragging: false,
       startX: 0,
+      startY: 0,
       scrollStart: 0,
       movedPx: 0,
+      dragAxis: null,     // 'x' | 'y' | null
+      pointerId: null,
+      _origTouchAction: "",
 
       // setas
       canScrollPrev: false,
@@ -253,42 +257,106 @@ export default {
     },
 
     onCardClick(pIdx) {
-      if (this.movedPx > 8) return; // ignorar se arrastou
+      // não abre se arrastou OU se gesto foi vertical
+      if (this.movedPx > 8 || this.dragAxis === 'y') return;
       this.open(pIdx, 0);
     },
 
-    /* ===== Pointer Events (drag só no mouse) ===== */
+    /* ===== Pointer Events com axis-lock + captura ===== */
     pointerStart(e) {
-      if (e.pointerType !== 'mouse') return; // mobile usa scroll nativo
-      this.isDragging = true;
-      this.movedPx = 0;
-      this.startX = e.clientX - this.$refs.row.offsetLeft;
-      this.scrollStart = this.$refs.row.scrollLeft;
+      const row = this.$refs.row;
+      if (!row) return;
+
+      this.pointerId = e.pointerId ?? null;
+      this.dragAxis   = null;    // indefinido até decidir
+      this.isDragging = false;   // só ativa quando eixo='x'
+      this.movedPx    = 0;
+      this.startX     = e.clientX - row.getBoundingClientRect().left;
+      this.startY     = e.clientY;
+      this.scrollStart = row.scrollLeft;
+
+      // guarda touch-action original para restaurar depois
+      this._origTouchAction = row.style.touchAction || "";
+
+      // ainda não capturamos o ponteiro; só quando eixo='x'
     },
+
     pointerMove(e) {
-      if (!this.isDragging || e.pointerType !== 'mouse') return;
-      const x = e.clientX - this.$refs.row.offsetLeft;
-      const delta = x - this.startX;
-      this.movedPx = Math.max(this.movedPx, Math.abs(delta));
-      this.$refs.row.scrollLeft = this.scrollStart - delta * 1.2;
+      const row = this.$refs.row;
+      if (!row) return;
+
+      // se já decidiu que é vertical, libera tudo
+      if (this.dragAxis === 'y') return;
+
+      const x = e.clientX - row.getBoundingClientRect().left;
+      const dx = x - this.startX;
+      const dy = e.clientY - this.startY;
+
+      // decide o eixo após um pequeno threshold
+      if (this.dragAxis === null) {
+        const THRESH = 6;
+        if (Math.abs(dx) < THRESH && Math.abs(dy) < THRESH) return;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+          // eixo horizontal — ativar captura e bloquear ação do browser
+          this.dragAxis = 'x';
+          this.isDragging = true;
+
+          // captura este ponteiro para receber os próximos moves
+          if (this.pointerId != null && row.setPointerCapture) {
+            try { row.setPointerCapture(this.pointerId); } catch (_) {}
+          }
+          // durante o drag horizontal, assumimos controle total do gesto
+          row.style.touchAction = 'none';
+        } else {
+          // gesto vertical — não interferir (scroll da página)
+          this.dragAxis = 'y';
+          this.isDragging = false;
+          // garantir que o nativo pode rolar
+          row.style.touchAction = 'pan-x pan-y pinch-zoom';
+          return;
+        }
+      }
+
+      if (this.dragAxis === 'x') {
+        // evita que o browser tente rolar/gestos durante o drag horizontal
+        e.preventDefault();
+
+        this.movedPx = Math.max(this.movedPx, Math.abs(dx));
+        row.scrollLeft = this.scrollStart - dx * 1.1;
+      }
     },
-    pointerEnd(e) {
-      if (!this.isDragging || (e && e.pointerType !== 'mouse')) return;
+
+    pointerEnd() {
+      const row = this.$refs.row;
+      if (row && this.pointerId != null && row.releasePointerCapture) {
+        try { row.releasePointerCapture(this.pointerId); } catch (_) {}
+      }
+      if (this.dragAxis === 'x' && this.movedPx > 8) {
+        this.snapToNearest();
+      }
+      // restaura touch-action original
+      if (row) row.style.touchAction = this._origTouchAction;
+
       this.isDragging = false;
-      if (this.movedPx > 8) this.snapToNearest();
-      setTimeout(()=>{ this.movedPx = 0; }, 0);
+      this.dragAxis = null;
+      this.pointerId = null;
+      setTimeout(() => { this.movedPx = 0; }, 0);
+    },
+
+    /* ===== Roda do mouse: horizontaliza scroll ===== */
+    wheelScroll(e) {
+      const el = this.$refs.row; if (!el) return;
+      // trackpad tende a ter deltaX; mouse, deltaY — usamos o maior
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (el.scrollWidth > el.clientWidth) {
+        el.scrollLeft += delta;
+        // não prevenimos: com .passive no @wheel, o browser decide
+      }
     },
 
     /* ===== Setas & rolagem ===== */
     onRowScroll(){ this.updateArrows(); this.updateVisibleIndex(); },
-    wheelScroll(e){
-      const row = this.$refs.row; if(!row) return;
-      // no desktop, rolagem vertical vira horizontal
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        row.scrollLeft += e.deltaY;
-        this.updateArrows(); this.updateVisibleIndex();
-      }
-    },
     updateArrows(){
       const row = this.$refs.row; if(!row) return;
       const max = row.scrollWidth - row.clientWidth;
@@ -355,14 +423,13 @@ export default {
   padding-right: var(--ps-gap); padding-bottom: 8px;
   scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none;
   min-height: 1px; cursor: grab; scroll-behavior: smooth; outline: none;
-  touch-action: pan-x;                 /* ← permite swipe horizontal no mobile */
-  -webkit-overflow-scrolling: touch;  /* ← momentum no iOS */
+
+  /* ✅ permite gestos em AMBOS eixos; JS decide quando “pegar” o horizontal */
+  touch-action: pan-x pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
 .ps-row::-webkit-scrollbar{ display:none; }
-
-/* ajuda a não bloquear o gesto ao tocar no card */
-.ps-cardBtn, .ps-media{ touch-action: pan-x; }
 
 /* 1 / 2 / 3 cards por vez */
 .ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
@@ -385,7 +452,7 @@ export default {
 @media (min-width:1024px){ .ps-arrow{ display:inline-flex; } }
 
 /* cartão */
-.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:20px; outline: none; -webkit-tap-highlight-color: transparent; }
+.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:20px; outline: none; }
 .ps-cardBtn:focus-visible .ps-media{ box-shadow:0 0 0 3px rgba(54,39,39,.35); }
 
 .ps-media{
@@ -439,7 +506,6 @@ export default {
 .ps-view{ position:relative; background:rgba(0,0,0,.35); border-radius:12px; overflow:hidden; }
 .ps-big{ display:block; width:100%; height:70vh; object-fit:contain; background:#000; }
 
-/* setas dentro do modal */
 .ps-nav{
   position:absolute; top:50%; transform:translateY(-50%);
   display:inline-flex; align-items:center; justify-content:center;
