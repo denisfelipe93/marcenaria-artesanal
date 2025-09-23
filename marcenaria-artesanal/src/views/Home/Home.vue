@@ -86,7 +86,7 @@ export default {
   justify-content:flex-start;
   width:100%;
   max-width:1400px;
-  padding:50px 5vw 0 5vw; /* desktop */
+  padding:0px 5vw 0 5vw; /* desktop */
   height:auto;
   margin:0 auto;
 }

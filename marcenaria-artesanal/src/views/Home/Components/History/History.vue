@@ -71,12 +71,12 @@
             </div>
             <div class="divider" aria-hidden="true"></div>
             <div class="stat">
-              <div class="value" aria-label="vinte mil projetos">20K+</div>
+              <div class="value" aria-label="vinte mil projetos">20k+</div>
               <div class="label">Projetos Criados</div>
             </div>
             <div class="divider" aria-hidden="true"></div>
             <div class="stat">
-              <div class="value" aria-label="trinta e cinco mil clientes">35K+</div>
+              <div class="value" aria-label="trinta e cinco mil clientes">35k+</div>
               <div class="label">Clientes Satisfeitos</div>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default {
   gap:0;
   overflow:hidden;
 }
-.stats-card.dark.rounded{ border-radius:18px; box-shadow:0 20px 40px rgba(15,17,21,.28); }
+.stats-card.dark.rounded{ border-radius:15px !important; box-shadow:0 20px 40px rgba(15,17,21,.28); }
 
 .stat{ display:grid; gap:10px; place-items:center; padding:0 18px; text-align:center; min-width:0; }
 .value{

@@ -161,7 +161,7 @@ export default {
       activeIndex: -1,
       current: 0,
 
-      // arrasto universal
+      // arrasto
       isDragging: false,
       startX: 0,
       scrollStart: 0,
@@ -257,22 +257,23 @@ export default {
       this.open(pIdx, 0);
     },
 
-    /* ===== Pointer Events ===== */
+    /* ===== Pointer Events (drag só no mouse) ===== */
     pointerStart(e) {
+      if (e.pointerType !== 'mouse') return; // mobile usa scroll nativo
       this.isDragging = true;
       this.movedPx = 0;
       this.startX = e.clientX - this.$refs.row.offsetLeft;
       this.scrollStart = this.$refs.row.scrollLeft;
     },
     pointerMove(e) {
-      if (!this.isDragging) return;
+      if (!this.isDragging || e.pointerType !== 'mouse') return;
       const x = e.clientX - this.$refs.row.offsetLeft;
       const delta = x - this.startX;
       this.movedPx = Math.max(this.movedPx, Math.abs(delta));
       this.$refs.row.scrollLeft = this.scrollStart - delta * 1.2;
     },
-    pointerEnd() {
-      if (!this.isDragging) return;
+    pointerEnd(e) {
+      if (!this.isDragging || (e && e.pointerType !== 'mouse')) return;
       this.isDragging = false;
       if (this.movedPx > 8) this.snapToNearest();
       setTimeout(()=>{ this.movedPx = 0; }, 0);
@@ -280,6 +281,14 @@ export default {
 
     /* ===== Setas & rolagem ===== */
     onRowScroll(){ this.updateArrows(); this.updateVisibleIndex(); },
+    wheelScroll(e){
+      const row = this.$refs.row; if(!row) return;
+      // no desktop, rolagem vertical vira horizontal
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        row.scrollLeft += e.deltaY;
+        this.updateArrows(); this.updateVisibleIndex();
+      }
+    },
     updateArrows(){
       const row = this.$refs.row; if(!row) return;
       const max = row.scrollWidth - row.clientWidth;
@@ -346,10 +355,14 @@ export default {
   padding-right: var(--ps-gap); padding-bottom: 8px;
   scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none;
   min-height: 1px; cursor: grab; scroll-behavior: smooth; outline: none;
-  touch-action: pan-y;
+  touch-action: pan-x;                 /* ← permite swipe horizontal no mobile */
+  -webkit-overflow-scrolling: touch;  /* ← momentum no iOS */
 }
 .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
 .ps-row::-webkit-scrollbar{ display:none; }
+
+/* ajuda a não bloquear o gesto ao tocar no card */
+.ps-cardBtn, .ps-media{ touch-action: pan-x; }
 
 /* 1 / 2 / 3 cards por vez */
 .ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
@@ -372,7 +385,7 @@ export default {
 @media (min-width:1024px){ .ps-arrow{ display:inline-flex; } }
 
 /* cartão */
-.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:20px; outline: none; }
+.ps-cardBtn{ all:unset; display:block; cursor:pointer; border-radius:20px; outline: none; -webkit-tap-highlight-color: transparent; }
 .ps-cardBtn:focus-visible .ps-media{ box-shadow:0 0 0 3px rgba(54,39,39,.35); }
 
 .ps-media{
@@ -411,7 +424,7 @@ export default {
 .ps-backdrop{
   position:fixed; left:0; top:0; width:100vw; height:100vh;
   z-index:999999; display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.82); /* 👈 mais escuro */
+  background:rgba(0,0,0,.82);
 }
 .ps-panel{ width:min(1200px,92vw); position:relative; }
 
@@ -426,7 +439,7 @@ export default {
 .ps-view{ position:relative; background:rgba(0,0,0,.35); border-radius:12px; overflow:hidden; }
 .ps-big{ display:block; width:100%; height:70vh; object-fit:contain; background:#000; }
 
-/* setas dentro do modal — centralizadas e afastadas das bordas */
+/* setas dentro do modal */
 .ps-nav{
   position:absolute; top:50%; transform:translateY(-50%);
   display:inline-flex; align-items:center; justify-content:center;
