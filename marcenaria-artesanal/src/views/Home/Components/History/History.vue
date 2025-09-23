@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import imgCover from '@/assets/history/cover.png'
+import imgCover from '@/assets/history/cover.jpg'
 import logoSvg from '@/assets/history/martesanal.svg'
 import img1 from '@/assets/history/a13.webp'
 
