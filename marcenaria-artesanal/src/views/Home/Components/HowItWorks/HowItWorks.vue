@@ -1,6 +1,7 @@
 <template>
   <section class="hiw">
     <div class="hiw-head">
+      <!-- título preenchido, sem stroke -->
       <h2 class="hiw-title">
         Sua jornada com a gente<br />
         é clara, leve e segura.
@@ -63,10 +64,10 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const steps = [
   { id: "01", num: "01.", title: "Reunião de Briefing", desc: "É nesse primeiro contato que ouvimos sua história, rotina e o que você espera do seu novo ambiente. Aqui começa a transformação." },
-  { id: "02", num: "02.", title: "Criação do<br/>Projeto", desc: "Transformamos suas ideias em um projeto 3D exclusivo, que une estilo, funcionalidade e aproveitamento inteligente de espaço." },
-  { id: "03", num: "03.", title: "Proposta<br/>Personalizada", desc: "Apresentamos todos os detalhes e valores com clareza, de acordo com suas escolhas, necessidades e prioridades." },
-  { id: "04", num: "04.", title: "Fechamento com<br/>Segurança", desc: "Com tudo aprovado, formalizamos o contrato com prazos definidos, garantias e total transparência para sua tranquilidade." },
-  { id: "05", num: "05.", title: "Fabricação e<br/>Montagem", desc: "Seu projeto ganha vida com materiais de alta qualidade. Nossa equipe própria cuida da entrega e da montagem na sua casa." },
+  { id: "02", num: "02.", title: "Criação do Projeto", desc: "Transformamos suas ideias em um projeto 3D exclusivo, que une estilo, funcionalidade e aproveitamento inteligente de espaço." },
+  { id: "03", num: "03.", title: "Proposta Personalizada", desc: "Apresentamos todos os detalhes e valores com clareza, de acordo com suas escolhas, necessidades e prioridades." },
+  { id: "04", num: "04.", title: "Fechamento com Segurança", desc: "Com tudo aprovado, formalizamos o contrato com prazos definidos, garantias e total transparência para sua tranquilidade." },
+  { id: "05", num: "05.", title: "Fabricação e Montagem", desc: "Seu projeto ganha vida com materiais de alta qualidade. Nossa equipe própria cuida da entrega e da montagem na sua casa." },
 ];
 
 const row = ref(null);
@@ -126,8 +127,29 @@ onBeforeUnmount(()=>{
 </script>
 
 <style scoped>
+.hiw{
+  /* troque o hex abaixo pelo mesmo usado na sua sessão PROJETOS */
+  background: #ececeb;
+}
+
 .hiw-head{ max-width:1400px; margin:0 auto; padding:40px 5vw 24px; }
-.hiw-title{ color:rgba(0,0,0,.85); font-family:Arboria-Bold,system-ui; font-size:clamp(28px,3.2vw,44px); line-height:1.2; margin:0 0 8px 0; }
+
+/* Título: preenchido, sem stroke, suavizado */
+.hiw-title{
+  font-family: Arboria-Bold, system-ui;
+  font-size: clamp(27px,2.8vw,40px);
+  line-height: 1.12;
+  margin: 0 0 8px 0;
+  letter-spacing: .01em;
+  color: rgba(0,0,0,.85);          /* mesma vibe do PROJETOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* garante que nenhum shadow/stroke “vaze” de estilos globais */
+  -webkit-text-stroke: 0 transparent !important;
+  text-shadow: none !important;
+}
+
 .hiw-kicker{ color:rgba(0,0,0,.5); margin:0; font-family:Arboria-Light,system-ui; }
 
 .hiw-band{ background:#341818; }
