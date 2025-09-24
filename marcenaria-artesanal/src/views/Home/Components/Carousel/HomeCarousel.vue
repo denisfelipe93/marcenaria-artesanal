@@ -100,18 +100,18 @@
 import ImageModal from "@/views/Home/Components/Carousel/ImageModal";
 
 // ✅ importe as imagens com ?url (Vite gera a URL correta no build)
-import img1  from "@/assets/carousel/image1.png?url";
-import img2  from "@/assets/carousel/image2.png?url";
-import img3  from "@/assets/carousel/image3.png?url";
-import img4  from "@/assets/carousel/image4.png?url";
-import img5  from "@/assets/carousel/image5.png?url";
-import img6  from "@/assets/carousel/image6.png?url";
-import img7  from "@/assets/carousel/image7.png?url";
-import img8  from "@/assets/carousel/image8.png?url";
-import img9  from "@/assets/carousel/image9.png?url";
-import img10 from "@/assets/carousel/image10.png?url";
-import img11 from "@/assets/carousel/image11.png?url";
-import img12 from "@/assets/carousel/image12.png?url";
+import img1  from "@/assets/carousel/image1.webp?url";
+import img2  from "@/assets/carousel/image2.webp?url";
+import img3  from "@/assets/carousel/image3.webp?url";
+import img4  from "@/assets/carousel/image4.webp?url";
+import img5  from "@/assets/carousel/image5.webp?url";
+import img6  from "@/assets/carousel/image6.webp?url";
+import img7  from "@/assets/carousel/image7.webp?url";
+import img8  from "@/assets/carousel/image8.webp?url";
+import img9  from "@/assets/carousel/image9.webp?url";
+import img10 from "@/assets/carousel/image10.webp?url";
+import img11 from "@/assets/carousel/image11.webp?url";
+import img12 from "@/assets/carousel/image12.webp?url";
 
 export default {
   name: "Home",
