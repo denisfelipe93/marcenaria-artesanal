@@ -7,15 +7,17 @@
         aria-label="Projetos"
         ref="row"
         @scroll="onRowScroll"
-        @wheel.passive="wheelScroll"
+        @wheel="wheelScroll"
         @keydown="onRowKey"
         @mouseenter="focusRow"
         @pointerdown="pointerStart"
         @pointermove="pointerMove"
         @pointerup="pointerEnd"
         @pointercancel="pointerEnd"
+        @pointerleave="pointerEnd"
         :class="{ 'is-dragging': isDragging }"
         tabindex="0"
+        @dragstart.prevent
       >
         <article
           v-for="(project, pIdx) in projects"
@@ -38,6 +40,7 @@
                 class="ps-img"
                 loading="lazy"
                 decoding="async"
+                draggable="false"
                 @load="coverLoaded[pIdx] = true"
                 @error="onImgError"
               />
@@ -105,6 +108,7 @@
                 class="ps-big"
                 loading="lazy"
                 decoding="async"
+                draggable="false"
               />
               <button class="ps-nav ps-prev" :disabled="!canPrev" @click.stop="prev" aria-label="Anterior">←</button>
               <button class="ps-nav ps-next" :disabled="!canNext" @click.stop="next" aria-label="Próxima">→</button>
@@ -121,7 +125,7 @@
                 @click="current = i"
                 :aria-label="`${activeProject.title} miniatura ${i + 1}`"
               >
-                <img :src="p" alt="" />
+                <img :src="p" alt="" draggable="false" />
               </button>
             </div>
           </div>
@@ -132,18 +136,18 @@
 </template>
 
 <script>
-import image1  from "@/assets/carousel/image1.png";
-import image2  from "@/assets/carousel/image2.png";
-import image3  from "@/assets/carousel/image3.png";
-import image4  from "@/assets/carousel/image4.png";
-import image5  from "@/assets/carousel/image5.png";
-import image6  from "@/assets/carousel/image6.png";
-import image7  from "@/assets/carousel/image7.png";
-import image8  from "@/assets/carousel/image8.png";
-import image9  from "@/assets/carousel/image9.png";
-import image10 from "@/assets/carousel/image10.png";
-import image11 from "@/assets/carousel/image11.png";
-import image12 from "@/assets/carousel/image12.png";
+import image1  from "@/assets/carousel/image1.webp";
+import image2  from "@/assets/carousel/image2.webp";
+import image3  from "@/assets/carousel/image3.webp";
+import image4  from "@/assets/carousel/image4.webp";
+import image5  from "@/assets/carousel/image5.webp";
+import image6  from "@/assets/carousel/image6.webp";
+import image7  from "@/assets/carousel/image7.webp";
+import image8  from "@/assets/carousel/image8.webp";
+import image9  from "@/assets/carousel/image9.webp";
+import image10 from "@/assets/carousel/image10.webp";
+import image11 from "@/assets/carousel/image11.webp";
+import image12 from "@/assets/carousel/image12.webp";
 
 export default {
   name: "ProjectsSection",
@@ -267,7 +271,7 @@ export default {
       const row = this.$refs.row;
       if (!row) return;
 
-      this.pointerId = e.pointerId ?? null;
+      this.pointerId  = e.pointerId ?? null;
       this.dragAxis   = null;
       this.isDragging = false;
       this.movedPx    = 0;
@@ -277,14 +281,16 @@ export default {
 
       // guarda touch-action original para restaurar depois
       this._origTouchAction = row.style.touchAction || "";
-
-      // ainda não capturamos o ponteiro; só quando eixo='x'
+      // captura só quando eixo for 'x'
     },
 
     pointerMove(e) {
       const row = this.$refs.row;
       if (!row) return;
       if (this.dragAxis === 'y') return;
+
+      // desktop: só arrasta se o botão esquerdo estiver pressionado
+      if (e.pointerType === 'mouse' && !(e.buttons & 1)) return;
 
       const x = e.clientX - row.getBoundingClientRect().left;
       const dx = x - this.startX;
@@ -342,12 +348,21 @@ export default {
       setTimeout(() => { this.movedPx = 0; }, 0);
     },
 
-    /* ===== Roda do mouse: horizontaliza scroll ===== */
+    /* ===== Roda do mouse: horizontaliza scroll só quando faz sentido ===== */
     wheelScroll(e) {
       const el = this.$refs.row; if (!el) return;
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (el.scrollWidth > el.clientWidth) {
-        el.scrollLeft += delta;
+
+      const predominantlyHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+      if (predominantlyHorizontal || e.shiftKey) {
+        // rola horizontal quando intenção é clara (ou Shift pressionado)
+        const delta = e.deltaX || e.deltaY; // cobre mouses que só emitem deltaY
+        if (el.scrollWidth > el.clientWidth) {
+          el.scrollLeft += delta;
+          e.preventDefault(); // bloqueia rolagem vertical do container nesse caso
+        }
+      } else {
+        // gesto vertical → deixa a página rolar normalmente
       }
     },
 
@@ -418,11 +433,17 @@ export default {
   overscroll-behavior-x: contain;
   padding-right: var(--ps-gap); padding-bottom: 8px;
   scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none;
-  min-height: 1px; cursor: grab; scroll-behavior: smooth; outline: none;
+  min-height: 1px; scroll-behavior: smooth; outline: none;
   touch-action: pan-x pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
 }
-.ps-row.is-dragging{ cursor: grabbing; user-select: none; }
+
+/* cursor 'grab' só em ambientes com hover (desktop) */
+@media (hover: hover) {
+  .ps-row{ cursor: grab; }
+  .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
+}
+
 .ps-row::-webkit-scrollbar{ display:none; }
 .ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
 

@@ -76,7 +76,7 @@
             </div>
             <div class="divider" aria-hidden="true"></div>
             <div class="stat">
-              <div class="value" aria-label="trinta e cinco mil clientes">35k+</div>
+              <div class="value" aria-label="trinta e cinco mil clientes">8k+</div>
               <div class="label">Clientes Satisfeitos</div>
             </div>
           </div>
