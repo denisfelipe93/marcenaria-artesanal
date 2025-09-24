@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       img1: `${new URL(
-        "../../../../assets/images/contato-pic.jpeg",
+        "@/assets/images/contato-pic.WebP",
         import.meta.url
       )}`,
 
