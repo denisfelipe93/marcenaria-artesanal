@@ -6,27 +6,25 @@
       :initial="{ opacity: 0 }"
       :visibleOnce="{
         opacity: 1,
-        transition: {
-          duration: 500,
-          type: 'keyframes',
-          ease: 'easeIn',
-        },
+        transition: { duration: 500, type: 'keyframes', ease: 'easeIn' },
       }"
     >
       <h3>Quer saber mais sobre nós?</h3>
       <p class="contact-main-container-text">
-        Deixe seu projeto conosco e prepare-se para ser surpreendido!</p>
-      <a href="https://wa.me/message/YRG5PWGMPL73G1"
-        >ENTRE EM CONTATO PELO WHATSAPP</a
-      >
+        Deixe seu projeto conosco e prepare-se para ser surpreendido!
+      </p>
+      <a href="https://wa.me/message/YRG5PWGMPL73G1">
+        ENTRE EM CONTATO PELO WHATSAPP
+      </a>
+
       <div class="contact-address-container">
         <font-awesome-icon
           :icon="['fas', 'fa-location-dot']"
           class="contact-map-icon"
         />
         <p>
-          Av. Gisele Constantino, 1548 - 2º andar<br />Pq. Bela Vista - Sorocaba
-          - SP
+          Av. Gisele Constantino, 1548 - 2º andar<br />
+          Pq. Bela Vista - Sorocaba - SP
         </p>
       </div>
     </div>
@@ -36,14 +34,8 @@
 <script>
 export default {
   name: "Contact",
-
   data() {
     return {
-      img1: `${new URL(
-        "../../../../assets/images/contato-pic.jpeg",
-        import.meta.url
-      )}`,
-
       windowWidth: window.innerWidth,
     };
   },
@@ -52,11 +44,9 @@ export default {
       window.addEventListener("resize", this.onResize);
     });
   },
-
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
   },
-
   methods: {
     onResize() {
       this.windowWidth = window.innerWidth;
@@ -65,12 +55,11 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
-.contact-container {
-}
+<style scoped>
+.contact-container {}
 .contact-main-container {
   background-color: #111010;
-  color: white;
+  color: #fff;
   padding: 45px;
   text-align: center;
 }
@@ -89,7 +78,7 @@ export default {
   font-size: 13px;
   padding: 8px 15px;
   text-transform: uppercase;
-  border: solid 1px gray;
+  border: 1px solid gray;
   color: rgba(255, 255, 255, 0.6);
   border-radius: 5px;
   margin-bottom: 50px;
@@ -98,11 +87,10 @@ export default {
   text-decoration: none;
 }
 .contact-main-container a:hover {
-  transition: 0.2s ease-in-out;
-  border: solid 1px white;
+  border: 1px solid #fff;
   background-color: rgba(128, 128, 128, 0.322);
-  color: white;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
 }
 .contact-address-container {
   margin: 0 auto;
@@ -116,18 +104,21 @@ export default {
   font-size: 15px;
   text-align: left;
 }
-
 .contact-map-icon {
   height: 25px;
   margin-right: 20px;
 }
+
 @media (min-width: 768px) {
   .contact-container {
     background-color: #341818;
     display: flex;
     justify-content: center;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-      url("../../../../assets/images/contato-pic.WebP") no-repeat fixed center;
+
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+      url("@/assets/images/contato-pic.webp") no-repeat fixed center;
+
     background-origin: content-box;
     background-repeat: no-repeat;
     background-position: center center;
@@ -138,30 +129,20 @@ export default {
 
   .contact-main-container {
     width: 600px;
-    padding: 50px 100px 50px 100px;
+    padding: 50px 100px;
     color: rgba(255, 255, 255, 0.9);
   }
-  .contact-main-container h3 {
-    font-size: 24px;
-  }
-  .contact-main-container a {
-    font-size: 18px;
-  }
+  .contact-main-container h3 { font-size: 24px; }
+  .contact-main-container a { font-size: 18px; }
   .contact-main-container-text {
-    margin: 0 auto 50px auto;
+    margin: 0 auto 80px auto;
     font-size: 18px;
-    margin-bottom: 80px;
   }
   .contact-address-container {
     margin-top: 50px;
-    width: 360px;
     width: 390px;
   }
-  .contact-address-container p {
-    font-size: 18px;
-  }
-  .contact-map-icon {
-    height: 40px;
-  }
+  .contact-address-container p { font-size: 18px; }
+  .contact-map-icon { height: 40px; }
 }
 </style>

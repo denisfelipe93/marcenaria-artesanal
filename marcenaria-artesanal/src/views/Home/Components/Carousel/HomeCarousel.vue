@@ -1,4 +1,5 @@
 <template>
+  <!-- MOBILE / TABLET -->
   <v-carousel
     v-if="$vuetify.display.xs || $vuetify.display.sm || $vuetify.display.md"
     dark
@@ -8,19 +9,16 @@
     hide-delimiters
     hide-delimiter-background
   >
-    <template v-for="(item, index) in carouselItems">
-      <v-carousel-item
-        v-if="(index + 1) % columns === 1 || columns === 1"
-        :key="index"
-      >
+    <template v-for="(item, index) in carouselItems" :key="`m-${index}`">
+      <v-carousel-item v-if="(index + 1) % columns === 1 || columns === 1">
         <v-row class="flex-nowrap" style="height: 100%; margin: 0 -22px">
-          <template v-for="(n, i) in columns">
-            <template @click="openDialog(item)" v-if="+index + i < carouselItems.length">
-              <v-col :key="i">
+          <template v-for="(n, i) in columns" :key="`m-col-${index}-${i}`">
+            <template v-if="+index + i < carouselItems.length">
+              <v-col>
                 <v-sheet
-                  style="background-color: #EFEFEF"
-                  v-if="+index + i < carouselItems.length"
                   class="carouselItem"
+                  style="background-color: #EFEFEF"
+                  @click="openDialog(carouselItems[+index + i])"
                 >
                   <v-img
                     height="60%"
@@ -28,19 +26,7 @@
                     :alt="carouselItems[+index + i].description"
                     cover
                   />
-                  <h4
-                    style="
-                      height: 15vh;
-                      font-size: 15px;
-                      font-family: Arboria-Light;
-                      padding-top: 20px;
-                      color: rgba(0, 0, 0, 0.6);
-                      @media (min-width: 768px) {
-                        font-size: 24px;
-                        margin-top: 14px;
-                      }
-                    "
-                  >
+                  <h4 class="ci-title">
                     {{ carouselItems[+index + i].description }}
                   </h4>
                 </v-sheet>
@@ -50,6 +36,7 @@
         </v-row>
       </v-carousel-item>
     </template>
+
     <ImageModal
       v-if="dialog"
       :value="dialog"
@@ -58,6 +45,8 @@
       width="670px"
     />
   </v-carousel>
+
+  <!-- DESKTOP -->
   <v-carousel
     v-else
     height="90%"
@@ -66,20 +55,19 @@
     hide-delimiter-background
     show-arrows="hover"
   >
-    <template v-for="(item, index) in carouselItems">
+    <template v-for="(item, index) in carouselItems" :key="`d-${index}`">
       <v-carousel-item
         style="background-color: #EFEFEF"
         v-if="(index + 1) % columns === 1 || columns === 1"
-        :key="index"
       >
         <v-row class="flex-nowrap" style="height: 100%; margin: 0 -22px">
-          <template v-for="(n, i) in columns">
-            <template  @click="openDialog(item)" v-if="+index + i < carouselItems.length">
-              <v-col :key="i">
+          <template v-for="(n, i) in columns" :key="`d-col-${index}-${i}`">
+            <template v-if="+index + i < carouselItems.length">
+              <v-col>
                 <v-sheet
-                  style="background-color: #EFEFEF"
-                  v-if="+index + i < carouselItems.length"
                   class="carouselItem"
+                  style="background-color: #EFEFEF"
+                  @click="openDialog(carouselItems[+index + i])"
                 >
                   <v-img
                     height="60%"
@@ -87,19 +75,7 @@
                     :alt="carouselItems[+index + i].description"
                     cover
                   />
-                  <h4
-                    style="
-                      height: 15vh;
-                      font-size: 15px;
-                      font-family: Arboria-Light;
-                      padding-top: 20px;
-                      color: rgba(0, 0, 0, 0.6);
-                      @media (min-width: 768px) {
-                        font-size: 24px;
-                        margin-top: 14px;
-                      }
-                    "
-                  >
+                  <h4 class="ci-title">
                     {{ carouselItems[+index + i].description }}
                   </h4>
                 </v-sheet>
@@ -109,6 +85,7 @@
         </v-row>
       </v-carousel-item>
     </template>
+
     <ImageModal
       v-if="dialog"
       :value="dialog"
@@ -117,107 +94,59 @@
       width="670px"
     />
   </v-carousel>
-
 </template>
+
 <script>
 import ImageModal from "@/views/Home/Components/Carousel/ImageModal";
+
+// ✅ importe as imagens com ?url (Vite gera a URL correta no build)
+import img1  from "@/assets/carousel/image1.png?url";
+import img2  from "@/assets/carousel/image2.png?url";
+import img3  from "@/assets/carousel/image3.png?url";
+import img4  from "@/assets/carousel/image4.png?url";
+import img5  from "@/assets/carousel/image5.png?url";
+import img6  from "@/assets/carousel/image6.png?url";
+import img7  from "@/assets/carousel/image7.png?url";
+import img8  from "@/assets/carousel/image8.png?url";
+import img9  from "@/assets/carousel/image9.png?url";
+import img10 from "@/assets/carousel/image10.png?url";
+import img11 from "@/assets/carousel/image11.png?url";
+import img12 from "@/assets/carousel/image12.png?url";
+
 export default {
   name: "Home",
-  components: {ImageModal},
+  components: { ImageModal },
+
   data() {
     return {
-      logo: `${new URL("@/assets/images/logo.png", import.meta.url)}`,
       carouselItems: [
-        {
-          image: `${new URL(
-            "@/assets/carousel/image1.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image2.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image3.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image4.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image5.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image9.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image6.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image7.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image8.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image10.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image11.png",
-            import.meta.url
-          )}`
-        },
-        {
-          image: `${new URL(
-            "@/assets/carousel/image12.png",
-            import.meta.url
-          )}`
-        },
+        { image: img1,  description: ""  },
+        { image: img2,  description: ""  },
+        { image: img3,  description: ""  },
+        { image: img4,  description: ""  },
+        { image: img5,  description: ""  },
+        { image: img9,  description: ""  },
+        { image: img6,  description: ""  },
+        { image: img7,  description: ""  },
+        { image: img8,  description: ""  },
+        { image: img10, description: "" },
+        { image: img11, description: "" },
+        { image: img12, description: "" },
       ],
       dialog: false,
-      imgModal: '',
+      imgModal: "",
       actionsWidth: 100,
     };
   },
+
   computed: {
     columns() {
-      if (this.$vuetify.display.xs) {
-        return 1;
-      }
-      if (this.$vuetify.display.mdAndDown) {
-        return 2;
-      }
-
+      if (this.$vuetify.display.xs) return 1;
+      if (this.$vuetify.display.mdAndDown) return 2;
       return 3;
     },
   },
+
   methods: {
     closeDialog() {
       this.dialog = false;
@@ -225,11 +154,11 @@ export default {
     openDialog(item) {
       this.dialog = true;
       this.imgModal = item.image;
-      console.log(111111111, this.imgModal)
     },
   },
+
   mounted() {
-    const actionSlots = this.$refs.actionSlot;
+    const actionSlots = this.$refs?.actionSlot;
     if (actionSlots && actionSlots.length) {
       const actionSlot = actionSlots[0];
       this.actionsWidth = actionSlot.offsetWidth;
@@ -237,10 +166,27 @@ export default {
   },
 };
 </script>
-<style>
+
+<style scoped>
 .carouselItem {
   margin-right: 10px;
   margin-left: 10px;
   height: 60vh;
+  cursor: pointer;
+}
+
+.ci-title {
+  height: 15vh;
+  font-size: 15px;
+  font-family: Arboria-Light;
+  padding-top: 20px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 768px) {
+  .ci-title {
+    font-size: 24px;
+    margin-top: 14px;
+  }
 }
 </style>

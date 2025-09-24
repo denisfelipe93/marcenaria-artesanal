@@ -108,9 +108,7 @@
 
 <script>
 import imgCover from '@/assets/history/cover.jpg'
-import img1 from '@/assets/history/a-13-1920x1080.webp'
-import img2 from '@/assets/history/img2.jpg'
-import img3 from '@/assets/history/img3.jpg'
+import img1 from '@/assets/history/img1.jpg'
 
 export default {
   name: 'History',
@@ -118,7 +116,7 @@ export default {
     return {
       imgCover,
       showVideo: true,
-      videoId: 'EzirQte5neU', // <- ID atualizado
+      videoId: 'EzirQte5neU',
       useNoCookie: true,
       autoplay: 0,
       mute: 0,
@@ -139,22 +137,6 @@ export default {
             'Mais do que uma marcenaria, somos <strong>parceiros completos</strong> na realização de ambientes únicos.',
           ],
         },
-        /* {
-          key: 'beleza',
-          title: 'BELEZA',
-          img: img2,
-          paragraphs: [
-            'Com uma das maiores e mais modernas instalações no segmento de móveis sob medida da região, a Marcenaria Artesanal desenvolve projetos ao lado de renomados arquitetos e decoradores do estado de São Paulo.',
-          ],
-        },
-        {
-          key: 'sentido',
-          title: 'SENTIDO',
-          img: img3,
-          paragraphs: [
-            'Desde 1991, a Marcenaria Artesanal fabrica móveis de alta qualidade e procedência, com design arrojado e exclusivo, tendo como premissa a responsabilidade com o meio ambiente.',
-          ],
-        }, */
       ],
     }
   },
@@ -391,13 +373,6 @@ export default {
   background-color: rgba(0, 0, 0, 0.4);
   transform: scaleY(1.5);
 }
-
-/* REMOVIDO: contorno de foco padrão
-[data-hist] .carousel-indicator:focus {
-  outline: 2px solid var(--ink-900);
-  outline-offset: 2px;
-}
-*/
 
 /* Novo estilo de foco mais discreto */
 [data-hist] .carousel-indicator:focus {
@@ -718,7 +693,7 @@ export default {
   }
 }
 
-/* Acessibilidade: reduz animações se o usuário preferir */
+/* Acessibilidade: reduz animações se user preferir */
 @media (prefers-reduced-motion: reduce) {
   [data-hist] .carousel, 
   [data-hist] .indicator-progress,
