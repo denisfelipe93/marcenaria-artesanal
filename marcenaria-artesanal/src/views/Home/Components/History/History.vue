@@ -1,7 +1,7 @@
 <template>
-  <!-- troque theme-neutral por theme-warm se preferir o fundo creme -->
   <section class="history-bg theme-neutral">
     <div class="hist" data-hist>
+      
       <!-- ===== PARTE 1 — VÍDEO ===== -->
       <section class="hero-video">
         <div class="frame">

@@ -268,8 +268,8 @@ export default {
       if (!row) return;
 
       this.pointerId = e.pointerId ?? null;
-      this.dragAxis   = null;    // indefinido até decidir
-      this.isDragging = false;   // só ativa quando eixo='x'
+      this.dragAxis   = null;
+      this.isDragging = false;
       this.movedPx    = 0;
       this.startX     = e.clientX - row.getBoundingClientRect().left;
       this.startY     = e.clientY;
@@ -284,8 +284,6 @@ export default {
     pointerMove(e) {
       const row = this.$refs.row;
       if (!row) return;
-
-      // se já decidiu que é vertical, libera tudo
       if (this.dragAxis === 'y') return;
 
       const x = e.clientX - row.getBoundingClientRect().left;
@@ -347,11 +345,9 @@ export default {
     /* ===== Roda do mouse: horizontaliza scroll ===== */
     wheelScroll(e) {
       const el = this.$refs.row; if (!el) return;
-      // trackpad tende a ter deltaX; mouse, deltaY — usamos o maior
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       if (el.scrollWidth > el.clientWidth) {
         el.scrollLeft += delta;
-        // não prevenimos: com .passive no @wheel, o browser decide
       }
     },
 
@@ -423,16 +419,13 @@ export default {
   padding-right: var(--ps-gap); padding-bottom: 8px;
   scroll-snap-type:x mandatory; -ms-overflow-style:none; scrollbar-width:none;
   min-height: 1px; cursor: grab; scroll-behavior: smooth; outline: none;
-
-  /* ✅ permite gestos em AMBOS eixos; JS decide quando “pegar” o horizontal */
   touch-action: pan-x pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
 }
 .ps-row.is-dragging{ cursor: grabbing; user-select: none; }
 .ps-row::-webkit-scrollbar{ display:none; }
-
-/* 1 / 2 / 3 cards por vez */
 .ps-card{ flex:0 0 90%; scroll-snap-align:start; scroll-snap-stop: always; }
+
 @media (min-width:640px){ .ps-card{ flex-basis: calc((100% - var(--ps-gap))/2); } }
 @media (min-width:1024px){ .ps-card{ flex-basis: calc((100% - (2*var(--ps-gap)))/3); } }
 
